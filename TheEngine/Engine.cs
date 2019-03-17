@@ -6,6 +6,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using TheDX11;
+using TheEngine.GUI;
+using TheEngine.Input;
 using TheEngine.Interfaces;
 using TheEngine.Managers;
 
@@ -32,22 +34,27 @@ namespace TheEngine
         internal CameraManager cameraManger { get; }
         public ICameraManager CameraManager => cameraManger;
 
+        internal InputManager inputManager { get; }
+        public InputManager InputManager => inputManager;
 
         private Thread renderThread;
 
-        private bool isDisposing;
+        private volatile bool isDisposing;
         private readonly Action<float> updateLoop;
 
         public double TotalTime;
 
-        public Engine(IConfiguration configuration, IntPtr outputHandle, Action<float> updateLoop)
+        public Engine(IConfiguration configuration, IHwndHost windowHost, Action<float> updateLoop)
         {
+            windowHost.Bind(this);
+
             Configuration = configuration;
             this.updateLoop = updateLoop;
-            Device = new TheDevice(outputHandle, true);
+            Device = new TheDevice(windowHost.Handle, true);
 
             Device.Initialize();
 
+            inputManager = new InputManager(this);
             cameraManger = new CameraManager(this);
 
             shaderManager = new ShaderManager(this);

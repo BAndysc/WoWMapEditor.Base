@@ -33,6 +33,8 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -46,10 +48,17 @@
     <Compile Include="Entities\Camera.cs" />
     <Compile Include="Entities\Mesh.cs" />
     <Compile Include="Entities\Transform.cs" />
+    <Compile Include="GUI\IHwndHost.cs" />
+    <Compile Include="GUI\TheEnginePanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Handles\MaterialHandle.cs" />
     <Compile Include="Handles\MeshHandle.cs" />
     <Compile Include="Handles\RenderHandle.cs" />
     <Compile Include="Handles\ShaderHandle.cs" />
+    <Compile Include="Input\IMouse.cs" />
+    <Compile Include="Input\InputManager.cs" />
+    <Compile Include="Input\Mouse.cs" />
     <Compile Include="Interfaces\ICamera.cs" />
     <Compile Include="Interfaces\ICameraManager.cs" />
     <Compile Include="Interfaces\IConfiguration.cs" />
@@ -66,6 +75,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Structures\SceneBuffer.cs" />
     <Compile Include="Structures\UniversalVertex.cs" />
+    <Compile Include="WinApi\NativeMethods.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TheDX11\TheDX11.csproj">

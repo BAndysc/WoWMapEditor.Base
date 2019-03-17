@@ -38,6 +38,8 @@ namespace TheEngine
         private bool isDisposing;
         private readonly Action<float> updateLoop;
 
+        public double TotalTime;
+
         public Engine(IConfiguration configuration, IntPtr outputHandle, Action<float> updateLoop)
         {
             Configuration = configuration;
@@ -66,6 +68,7 @@ namespace TheEngine
             double lastMs = 0;
             while (!isDisposing)
             {
+                TotalTime = sw.Elapsed.TotalMilliseconds;
                 renderManager.Render();
                 double sinceLast = sw.Elapsed.TotalMilliseconds - lastMs;
                 lastMs = sw.Elapsed.TotalMilliseconds;

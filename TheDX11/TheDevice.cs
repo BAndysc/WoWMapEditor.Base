@@ -175,7 +175,7 @@ namespace TheDX11
         // Call only from render thread
         public void RenderBlitBuffer()
         {
-            swapChain.Present(1, PresentFlags.None);
+            swapChain.Present(0, PresentFlags.None);
         }
 
         public void Dispose()

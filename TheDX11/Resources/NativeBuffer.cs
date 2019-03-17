@@ -42,10 +42,10 @@ namespace TheDX11.Resources
         {
             BufferDescription bufferDesc = new BufferDescription()
             {
-                Usage = ResourceUsage.Dynamic,
+                Usage = ResourceUsage.Default,
                 SizeInBytes = Utilities.SizeOf<T>() * Length, // Must be divisable by 16 bytes, so this is equated to 32 (?)
                 BindFlags = BufferTypeToBindFlags(BufferType),
-                CpuAccessFlags = CpuAccessFlags.Write,
+                CpuAccessFlags = CpuAccessFlags.None,
                 OptionFlags = ResourceOptionFlags.None,
                 StructureByteStride = 0
             };
@@ -62,12 +62,11 @@ namespace TheDX11.Resources
                 Length = newData.Length;
                 CreateBuffer();
             }
-            device.ImmediateContext.MapSubresource(Buffer, MapMode.WriteDiscard, MapFlags.None, out var mappedResource);
-            mappedResource.WriteRange(newData);
-            device.ImmediateContext.UnmapSubresource(Buffer, 0);
+            device.ImmediateContext.UpdateSubresource(newData, Buffer);
         }
+        
         // this method can be called only from render thread
-        public void UpdateBuffer(T newData)
+        public void UpdateBuffer(ref T newData)
         {
             if (Length != 1)
             {
@@ -75,9 +74,7 @@ namespace TheDX11.Resources
                 Length = 1;
                 CreateBuffer();
             }
-            device.ImmediateContext.MapSubresource(Buffer, MapMode.WriteDiscard, MapFlags.None, out var mappedResource);
-            mappedResource.Write(newData);
-            device.ImmediateContext.UnmapSubresource(Buffer, 0);
+            device.ImmediateContext.UpdateSubresource(ref newData, Buffer);
         }
 
         private static BindFlags BufferTypeToBindFlags(BufferTypeEnum bufferType)

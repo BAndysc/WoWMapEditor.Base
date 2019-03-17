@@ -11,6 +11,8 @@ namespace TheEngine.Config
         internal static int SCENE_BUFFER_INDEX = 12;
         internal static int OBJECT_BUFFER_INDEX = 13;
 
+        internal static int PIXEL_SCENE_BUFFER_INDEX = 13;
+
         internal static string SHADER_INCLUDE_DIR = "internalShaders";
     }
 }

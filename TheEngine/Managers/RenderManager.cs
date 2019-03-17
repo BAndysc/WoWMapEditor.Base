@@ -19,12 +19,15 @@ namespace TheEngine.Managers
 
         private NativeBuffer<SceneBuffer> sceneBuffer;
         private NativeBuffer<ObjectBuffer> objectBuffer;
+        private NativeBuffer<PixelShaderSceneBuffer> pixelShaderSceneBuffer;
 
+        private ObjectBuffer objectData;
         private SceneBuffer sceneData;
+        private PixelShaderSceneBuffer scenePixelData;
 
         private ICameraManager cameraManager;
-
-        private List<RendererEntry> renderers = new List<RendererEntry>();
+        
+        private Dictionary<Shader, Dictionary<Mesh, List<Transform>>> renderers;
 
         internal RenderManager(Engine engine)
         {
@@ -34,12 +37,16 @@ namespace TheEngine.Managers
 
             sceneBuffer = engine.Device.CreateBuffer<SceneBuffer>(BufferTypeEnum.ConstVertex, 1);
             objectBuffer = engine.Device.CreateBuffer<ObjectBuffer>(BufferTypeEnum.ConstVertex, 1);
+            pixelShaderSceneBuffer = engine.Device.CreateBuffer<PixelShaderSceneBuffer>(BufferTypeEnum.ConstPixel, 1);
+
+            renderers = new Dictionary<Shader, Dictionary<Mesh, List<Transform>>>();
 
             sceneData = new SceneBuffer();
         }
         
         public void Dispose()
         {
+            pixelShaderSceneBuffer.Dispose();
             objectBuffer.Dispose();
             sceneBuffer.Dispose();
         }
@@ -50,22 +57,30 @@ namespace TheEngine.Managers
 
             engine.Device.RenerClearBuffer();
 
-            sceneBuffer.UpdateBuffer(sceneData);
+            sceneBuffer.UpdateBuffer(ref sceneData);
             sceneBuffer.Activate(Constants.SCENE_BUFFER_INDEX);
 
-            foreach (var renderer in renderers)
+            pixelShaderSceneBuffer.UpdateBuffer(ref scenePixelData);
+            pixelShaderSceneBuffer.Activate(Constants.PIXEL_SCENE_BUFFER_INDEX);
+
+            objectBuffer.Activate(Constants.OBJECT_BUFFER_INDEX);
+
+            foreach (var shaderPair in renderers)
             {
-                var worldMatrix = renderer.transform.LocalToWorldMatrix;
-                worldMatrix.Transpose();
-                objectBuffer.UpdateBuffer(new ObjectBuffer() { WorldMatrix = worldMatrix });
-                objectBuffer.Activate(Constants.OBJECT_BUFFER_INDEX);
+                shaderPair.Key.Activate();
 
-                renderer.shader.Activate();
+                foreach (var meshPair in shaderPair.Value)
+                {
+                    meshPair.Key.VerticesBuffer.Activate(0);
+                    meshPair.Key.IndicesBuffer.Activate(0);
 
-                renderer.mesh.VerticesBuffer.Activate(0);
-                renderer.mesh.IndicesBuffer.Activate(0);
-
-                engine.Device.DrawIndexed(renderer.mesh.IndexCount, 0, 0);
+                    foreach (var instance in meshPair.Value)
+                    {
+                        Matrix.Transpose(ref instance.LocalToWorldMatrix, out objectData.WorldMatrix);
+                        objectBuffer.UpdateBuffer(ref objectData);
+                        engine.Device.DrawIndexed(meshPair.Key.IndexCount, 0, 0);
+                    }
+                }
             }
 
             engine.Device.RenderBlitBuffer();
@@ -78,23 +93,26 @@ namespace TheEngine.Managers
             proj.Transpose();
             var vm = camera.Transform.WorldToLocalMatrix;
             vm.Transpose();
-            sceneData = new SceneBuffer()
-            {
-                ViewMatrix = vm,
-                ProjectionMatrix = proj
-            };
+
+            sceneData.ViewMatrix = vm;
+            sceneData.ProjectionMatrix = proj;
+            sceneData.Time = (float)engine.TotalTime;
+
+            scenePixelData.Time = (float)engine.TotalTime;
         }
 
-        public RenderHandle RegisterRenderer(MeshHandle mesh, ShaderHandle materialHandle, Transform transform)
+        public RenderHandle RegisterRenderer(MeshHandle meshHandle, ShaderHandle materialHandle, Transform transform)
         {
-            RendererEntry entry = new RendererEntry()
-            {
-                mesh = engine.meshManager.GetMeshByHandle(mesh),
-                shader = engine.shaderManager.GetShaderByHandle(materialHandle),
-                transform = transform
-            };
+            var mesh = engine.meshManager.GetMeshByHandle(meshHandle);
+            var shader = engine.shaderManager.GetShaderByHandle(materialHandle);
 
-            renderers.Add(entry);
+            if (!renderers.ContainsKey(shader))
+                renderers[shader] = new Dictionary<Mesh, List<Transform>>();
+
+            if (!renderers[shader].ContainsKey(mesh))
+                renderers[shader][mesh] = new List<Transform>();
+
+            renderers[shader][mesh].Add(transform);
 
             return new RenderHandle();
         }
@@ -103,12 +121,5 @@ namespace TheEngine.Managers
         {
             
         }
-    }
-
-    internal class RendererEntry
-    {
-        public Mesh mesh;
-        public Shader shader;
-        public Transform transform;
     }
 }

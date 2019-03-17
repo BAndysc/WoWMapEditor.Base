@@ -3,6 +3,11 @@ cbuffer SceneBuffer : register(b12)
 {
     matrix viewMatrix;
     matrix projectionMatrix;
+    float time;
+
+    float align1;
+    float align2;
+    float align3;
 };
 
 cbuffer ObjectBuffer : register(b13)
@@ -16,5 +21,11 @@ cbuffer SceneBuffer : register(b13)
 {
     float4 lightPosition;
     float4 lightColor;
+
+    float time;
+
+    float align1;
+    float align2;
+    float align3;
 };
 #endif

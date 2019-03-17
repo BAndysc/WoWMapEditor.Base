@@ -135,6 +135,11 @@ namespace TheDX11
             device.ImmediateContext.Rasterizer.State = rasterizerState;
         }
 
+        public void DrawIndexed(object indexCount, int v1, int v2)
+        {
+            throw new NotImplementedException();
+        }
+
         // Safe multithread call
         public Texture CreateTexture(int width, int height, int[][] pixels)
         {
@@ -142,9 +147,9 @@ namespace TheDX11
         }
 
         // Safe multithread call
-        public Shader CreateShader(string path)
+        public Shader CreateShader(string path, string includePath = null)
         {
-            return new Shader(device, path);
+            return new Shader(device, path, includePath);
         }
 
         // Safe multithread call

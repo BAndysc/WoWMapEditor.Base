@@ -66,6 +66,19 @@ namespace TheDX11.Resources
             mappedResource.WriteRange(newData);
             device.ImmediateContext.UnmapSubresource(Buffer, 0);
         }
+        // this method can be called only from render thread
+        public void UpdateBuffer(T newData)
+        {
+            if (Length != 1)
+            {
+                Dispose();
+                Length = 1;
+                CreateBuffer();
+            }
+            device.ImmediateContext.MapSubresource(Buffer, MapMode.WriteDiscard, MapFlags.None, out var mappedResource);
+            mappedResource.Write(newData);
+            device.ImmediateContext.UnmapSubresource(Buffer, 0);
+        }
 
         private static BindFlags BufferTypeToBindFlags(BufferTypeEnum bufferType)
         {

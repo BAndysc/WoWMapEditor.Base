@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TheDX11.Resources;
+using TheEngine.Config;
 using TheEngine.Handles;
 using TheEngine.Interfaces;
 
@@ -30,7 +31,7 @@ namespace TheEngine.Managers
             if (shaderHandles.TryGetValue(path, out var shader))
                 return shader;
 
-            var newShader = engine.Device.CreateShader(path);
+            var newShader = engine.Device.CreateShader(path, Constants.SHADER_INCLUDE_DIR);
 
             byHandleShaders.Add(newShader);
 
@@ -48,6 +49,11 @@ namespace TheEngine.Managers
 
             byHandleShaders.Clear();
             shaderHandles.Clear();
+        }
+
+        internal Shader GetShaderByHandle(ShaderHandle materialHandle)
+        {
+            return byHandleShaders[materialHandle.Handle];
         }
     }
 }

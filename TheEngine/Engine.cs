@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -16,29 +17,36 @@ namespace TheEngine
 
         internal IConfiguration Configuration { get; }
 
-        private ShaderManager shaderManager;
+        internal ShaderManager shaderManager { get; }
         public IShaderManager ShaderManager => shaderManager;
 
 
-        private MeshManager meshManager;
+        internal MeshManager meshManager { get; }
         public IMeshManager MeshManager => meshManager;
 
 
-        private RenderManager renderManager;
+        internal RenderManager renderManager { get; }
         public IRenderManager RenderManager => renderManager;
+
+
+        internal CameraManager cameraManger { get; }
+        public ICameraManager CameraManager => cameraManger;
+
 
         private Thread renderThread;
 
         private bool isDisposing;
+        private readonly Action<float> updateLoop;
 
-        public Engine(IConfiguration configuration, IntPtr outputHandle)
+        public Engine(IConfiguration configuration, IntPtr outputHandle, Action<float> updateLoop)
         {
             Configuration = configuration;
-
-
+            this.updateLoop = updateLoop;
             Device = new TheDevice(outputHandle, true);
 
             Device.Initialize();
+
+            cameraManger = new CameraManager(this);
 
             shaderManager = new ShaderManager(this);
             meshManager = new MeshManager(this);
@@ -53,9 +61,15 @@ namespace TheEngine
 
         private void RenderThread()
         {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            double lastMs = 0;
             while (!isDisposing)
             {
                 renderManager.Render();
+                double sinceLast = sw.Elapsed.TotalMilliseconds - lastMs;
+                lastMs = sw.Elapsed.TotalMilliseconds;
+                updateLoop((float)sinceLast);
             }
         }
 
@@ -63,6 +77,8 @@ namespace TheEngine
         {
             isDisposing = true;
             renderThread.Join();
+
+            cameraManger.Dispose();
             renderManager.Dispose();
             shaderManager.Dispose();
             meshManager.Dispose();

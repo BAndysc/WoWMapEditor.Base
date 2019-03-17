@@ -1,0 +1,6 @@
+﻿cbuffer MatrixBuffer : register(b13)
+{
+    matrix worldMatrix;
+    matrix viewMatrix;
+    matrix projectionMatrix;
+};

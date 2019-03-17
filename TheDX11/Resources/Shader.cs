@@ -20,15 +20,44 @@ namespace TheDX11.Resources
         internal VertexShader VertexShader { get; }
         internal PixelShader PixelShader { get; }
 
-        internal Shader(Device device, string shaderFile)
+        public class ShaderInclude : Include
+        {
+            private readonly string incPath;
+
+            public IDisposable Shadow { get; set; }
+
+            public ShaderInclude(string incPath)
+            {
+                this.incPath = incPath;
+            }
+
+            public void Close(Stream stream)
+            {
+                stream.Close();
+            }
+
+            public void Dispose()
+            {
+                throw new NotImplementedException();
+            }
+
+            public Stream Open(IncludeType type, string fileName, Stream parentStream)
+            {
+                return new FileStream(incPath + "/" + fileName, FileMode.Open);
+            }
+        }
+
+        internal Shader(Device device, string shaderFile, string includePath = null)
         {
             var shaderContent = File.ReadAllText(shaderFile);
             var shaderData = JsonConvert.DeserializeObject<ShaderData>(shaderContent);
 
             var shaderDir = Path.GetDirectoryName(shaderFile);
 
-            ShaderBytecode vertexShaderByteCode = ShaderBytecode.CompileFromFile(shaderDir + "/" + shaderData.Vertex.Path, shaderData.Vertex.Entry, "vs_4_0", ShaderFlags.None, EffectFlags.None);
-            ShaderBytecode pixelShaderByteCode = ShaderBytecode.CompileFromFile(shaderDir + "/" + shaderData.Pixel.Path, shaderData.Pixel.Entry, "ps_4_0", ShaderFlags.None, EffectFlags.None);
+            var shaderInclude = new ShaderInclude(includePath);
+
+            ShaderBytecode vertexShaderByteCode = ShaderBytecode.CompileFromFile(shaderDir + "/" + shaderData.Vertex.Path, shaderData.Vertex.Entry, "vs_4_0", ShaderFlags.None, EffectFlags.None, new ShaderMacro[] { new ShaderMacro("VERTEX_SHADER", 1) }, shaderInclude);
+            ShaderBytecode pixelShaderByteCode = ShaderBytecode.CompileFromFile(shaderDir + "/" + shaderData.Pixel.Path, shaderData.Pixel.Entry, "ps_4_0", ShaderFlags.None, EffectFlags.None, new ShaderMacro[] { new ShaderMacro("PIXEL_SHADER", 1) }, shaderInclude);
 
             InputElement[] inputElements = LoadInputs(shaderData.Vertex.Input, shaderData.Instancing);
             ShaderInputLayout = new InputLayout(device, ShaderSignature.GetInputSignature(vertexShaderByteCode), inputElements);

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TheEngine.Entities;
+using TheEngine.Handles;
 using TheEngine.Interfaces;
 using TheMaths;
 
@@ -24,7 +25,9 @@ namespace TheEngine.Managers
         // @todo: not thread safe!
         public IMesh CreateMesh(Vector3[] vertices, int[] indices)
         {
-            var mesh = new Mesh(engine);
+            var handle = new MeshHandle(meshes.Count);
+
+            var mesh = new Mesh(engine, handle);
             mesh.SetVertices(vertices);
             mesh.SetIndices(indices, 0);
             mesh.Rebuild();
@@ -42,6 +45,11 @@ namespace TheEngine.Managers
             }
 
             meshes.Clear();
+        }
+
+        internal Mesh GetMeshByHandle(MeshHandle mesh)
+        {
+            return meshes[mesh.Handle];
         }
     }
 }

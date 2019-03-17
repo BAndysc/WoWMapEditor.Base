@@ -9,6 +9,13 @@ namespace TheEngine.Structures
 {
     internal struct UniversalVertex
     {
-        internal Vector3 position;
+        internal Vector4 position;
+        internal Vector4 color;
+
+        internal UniversalVertex(UniversalVertex other)
+        {
+            position = other.position;
+            color = other.color;
+        }
     }
 }

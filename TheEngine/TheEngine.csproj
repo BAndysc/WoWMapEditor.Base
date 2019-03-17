@@ -43,11 +43,15 @@
   <ItemGroup>
     <Compile Include="Config\Constants.cs" />
     <Compile Include="Engine.cs" />
+    <Compile Include="Entities\Camera.cs" />
     <Compile Include="Entities\Mesh.cs" />
+    <Compile Include="Entities\Transform.cs" />
     <Compile Include="Handles\MaterialHandle.cs" />
     <Compile Include="Handles\MeshHandle.cs" />
     <Compile Include="Handles\RenderHandle.cs" />
     <Compile Include="Handles\ShaderHandle.cs" />
+    <Compile Include="Interfaces\ICamera.cs" />
+    <Compile Include="Interfaces\ICameraManager.cs" />
     <Compile Include="Interfaces\IConfiguration.cs" />
     <Compile Include="Interfaces\IMaterialManager.cs" />
     <Compile Include="Interfaces\IMesh.cs" />
@@ -55,6 +59,7 @@
     <Compile Include="Interfaces\IRenderManager.cs" />
     <Compile Include="Interfaces\IShaderManager.cs" />
     <Compile Include="Config\Configuration.cs" />
+    <Compile Include="Managers\CameraManager.cs" />
     <Compile Include="Managers\MeshManager.cs" />
     <Compile Include="Managers\RenderManager.cs" />
     <Compile Include="Managers\ShaderManager.cs" />
@@ -72,6 +77,10 @@
       <Name>TheMaths</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="internalShaders\theengine.cginc">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

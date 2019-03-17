@@ -20,6 +20,8 @@ namespace TheDX11.Resources
         internal VertexShader VertexShader { get; }
         internal PixelShader PixelShader { get; }
 
+        public bool Instancing { get; }
+
         public class ShaderInclude : Include
         {
             private readonly string incPath;
@@ -56,15 +58,26 @@ namespace TheDX11.Resources
 
             var shaderInclude = new ShaderInclude(includePath);
 
-            ShaderBytecode vertexShaderByteCode = ShaderBytecode.CompileFromFile(shaderDir + "/" + shaderData.Vertex.Path, shaderData.Vertex.Entry, "vs_4_0", ShaderFlags.None, EffectFlags.None, new ShaderMacro[] { new ShaderMacro("VERTEX_SHADER", 1) }, shaderInclude);
-            ShaderBytecode pixelShaderByteCode = ShaderBytecode.CompileFromFile(shaderDir + "/" + shaderData.Pixel.Path, shaderData.Pixel.Entry, "ps_4_0", ShaderFlags.None, EffectFlags.None, new ShaderMacro[] { new ShaderMacro("PIXEL_SHADER", 1) }, shaderInclude);
+            var vertexMacros = new List<ShaderMacro> { new ShaderMacro("VERTEX_SHADER", 1) };
+            var pixelMacros = new List<ShaderMacro> { new ShaderMacro("PIXEL_SHADER", 1) };
+
+            Instancing = shaderData.Instancing;
+            if (Instancing)
+            {
+                vertexMacros.Add(new ShaderMacro("INSTANCING", 1));
+                pixelMacros.Add(new ShaderMacro("INSTANCING", 1));
+            }
+
+            ShaderBytecode vertexShaderByteCode = ShaderBytecode.CompileFromFile(shaderDir + "/" + shaderData.Vertex.Path, shaderData.Vertex.Entry, "vs_5_0", ShaderFlags.None, EffectFlags.None, vertexMacros.ToArray(), shaderInclude);
+            ShaderBytecode pixelShaderByteCode = ShaderBytecode.CompileFromFile(shaderDir + "/" + shaderData.Pixel.Path, shaderData.Pixel.Entry, "ps_5_0", ShaderFlags.None, EffectFlags.None, pixelMacros.ToArray(), shaderInclude);
 
             InputElement[] inputElements = LoadInputs(shaderData.Vertex.Input, shaderData.Instancing);
             ShaderInputLayout = new InputLayout(device, ShaderSignature.GetInputSignature(vertexShaderByteCode), inputElements);
 
             VertexShader = new VertexShader(device, vertexShaderByteCode);
             PixelShader = new PixelShader(device, pixelShaderByteCode);
-            
+
+
             vertexShaderByteCode.Dispose();
             pixelShaderByteCode.Dispose();
             this.device = device;
@@ -150,6 +163,16 @@ namespace TheDX11.Resources
                         InstanceDataStepRate = 1
                     });
                 }
+                //inputElements.Add(new InputElement()
+                //{
+                //    SemanticName = "SV_InstanceID",
+                //    SemanticIndex = 0,
+                //    Format = SharpDX.DXGI.Format.R32_UInt,
+                //    Slot = 2,
+                //    AlignedByteOffset = InputElement.AppendAligned,
+                //    Classification = InputClassification.PerInstanceData,
+                //    InstanceDataStepRate = 1
+                //});
             }
 
             return inputElements.ToArray();

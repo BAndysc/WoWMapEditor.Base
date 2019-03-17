@@ -50,10 +50,12 @@ namespace TheDX11
                 ModeDescription = new ModeDescription(size.Width, size.Height, new Rational(60, 1), Format.R8G8B8A8_UNorm),
                 SampleDescription = new SampleDescription(1, 0),
                 SwapEffect = SwapEffect.Discard,
-                Usage = Usage.RenderTargetOutput
+                Usage = Usage.RenderTargetOutput,
+                
             };
+            
 
-            Device.CreateWithSwapChain(DriverType.Hardware, flags, swapChainDescription, out device, out swapChain);
+            Device.CreateWithSwapChain(DriverType.Hardware, flags, new FeatureLevel[] { FeatureLevel.Level_11_1 }, swapChainDescription, out device, out swapChain);
 
 
             // New RenderTargetView from the backbuffer
@@ -171,6 +173,13 @@ namespace TheDX11
         {
             device.ImmediateContext.DrawIndexed(indexCount, startIndexLocation, baseVertexLocation);
         }
+
+        // call only form render thread
+        public void DrawIndexedInstanced(int indexCountPerInstance, int instanceCount, int startIndexLocation, int baseVertexLocation, int startInstanceLocation)
+        {
+            device.ImmediateContext.DrawIndexedInstanced(indexCountPerInstance, instanceCount, startIndexLocation, baseVertexLocation, startInstanceLocation);
+        }
+
 
         // Call only from render thread
         public void RenderBlitBuffer()

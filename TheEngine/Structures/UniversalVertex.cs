@@ -11,11 +11,13 @@ namespace TheEngine.Structures
     {
         internal Vector4 position;
         internal Vector4 color;
+        internal Vector4 normal;
 
         internal UniversalVertex(UniversalVertex other)
         {
             position = other.position;
             color = other.color;
+            normal = other.normal;
         }
     }
 }

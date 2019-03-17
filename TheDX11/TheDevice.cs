@@ -159,7 +159,10 @@ namespace TheDX11
         {
             return new NativeBuffer<T>(device, bufferType, size);
         }
-
+        public NativeBuffer<T> CreateBuffer<T>(BufferTypeEnum bufferType, T[] data) where T : struct
+        {
+            return new NativeBuffer<T>(device, bufferType, data);
+        }
 
         // call only form render thread
         public void RenerClearBuffer()

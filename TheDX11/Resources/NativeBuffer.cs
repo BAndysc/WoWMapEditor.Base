@@ -38,6 +38,15 @@ namespace TheDX11.Resources
             CreateBuffer();
         }
 
+        internal NativeBuffer(Device device, BufferTypeEnum bufferType, T[] data)
+        {
+            this.device = device;
+            this.BufferType = bufferType;
+
+            Length = data.Length;
+            CreateBufferWithData(data);
+        }
+
         private void CreateBuffer()
         {
             BufferDescription bufferDesc = new BufferDescription()
@@ -50,6 +59,21 @@ namespace TheDX11.Resources
                 StructureByteStride = 0
             };
             Buffer = new Buffer(device, bufferDesc);
+            VertexBufferBinding = new VertexBufferBinding(Buffer, Utilities.SizeOf<T>(), 0);
+        }
+
+        private void CreateBufferWithData(T[] data)
+        {
+            BufferDescription bufferDesc = new BufferDescription()
+            {
+                Usage = ResourceUsage.Default,
+                SizeInBytes = Utilities.SizeOf<T>() * Length, // Must be divisable by 16 bytes, so this is equated to 32 (?)
+                BindFlags = BufferTypeToBindFlags(BufferType),
+                CpuAccessFlags = CpuAccessFlags.None,
+                OptionFlags = ResourceOptionFlags.None,
+                StructureByteStride = 0
+            };
+            Buffer = Buffer.Create(device, data, bufferDesc);
             VertexBufferBinding = new VertexBufferBinding(Buffer, Utilities.SizeOf<T>(), 0);
         }
 

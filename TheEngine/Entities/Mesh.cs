@@ -33,6 +33,16 @@ namespace TheEngine.Entities
             IndicesBuffer = engine.Device.CreateBuffer<int>(BufferTypeEnum.Index, 1);
         }
 
+        internal Mesh(Engine engine, MeshHandle handle, UniversalVertex[] vertices, int[] indices)
+        {
+            this.engine = engine;
+            Handle = handle;
+            VerticesBuffer = engine.Device.CreateBuffer<UniversalVertex>(BufferTypeEnum.Vertex, vertices);
+            IndicesBuffer = engine.Device.CreateBuffer<int>(BufferTypeEnum.Index, indices);
+            this.vertices = vertices;
+            this.indices = indices;
+        }
+
         public void SetIndices(int[] indices, int submesh)
         {
             this.indices = indices;

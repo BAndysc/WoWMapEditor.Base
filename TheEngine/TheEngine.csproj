@@ -44,6 +44,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Config\Constants.cs" />
+    <Compile Include="Data\MeshData.cs" />
+    <Compile Include="Data\ObjModel.cs" />
+    <Compile Include="Data\ObjParser.cs" />
     <Compile Include="Engine.cs" />
     <Compile Include="Entities\Camera.cs" />
     <Compile Include="Entities\Mesh.cs" />

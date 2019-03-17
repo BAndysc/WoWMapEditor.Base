@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{2C91694B-5AB2-4E09-BF82-7540DD8DB1F7}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>TheEngine</RootNamespace>
+    <AssemblyName>TheEngine</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Config\Constants.cs" />
+    <Compile Include="Engine.cs" />
+    <Compile Include="Entities\Mesh.cs" />
+    <Compile Include="Handles\MaterialHandle.cs" />
+    <Compile Include="Handles\MeshHandle.cs" />
+    <Compile Include="Handles\RenderHandle.cs" />
+    <Compile Include="Handles\ShaderHandle.cs" />
+    <Compile Include="Interfaces\IConfiguration.cs" />
+    <Compile Include="Interfaces\IMaterialManager.cs" />
+    <Compile Include="Interfaces\IMesh.cs" />
+    <Compile Include="Interfaces\IMeshManager.cs" />
+    <Compile Include="Interfaces\IRenderManager.cs" />
+    <Compile Include="Interfaces\IShaderManager.cs" />
+    <Compile Include="Config\Configuration.cs" />
+    <Compile Include="Managers\MeshManager.cs" />
+    <Compile Include="Managers\RenderManager.cs" />
+    <Compile Include="Managers\ShaderManager.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Structures\SceneBuffer.cs" />
+    <Compile Include="Structures\UniversalVertex.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TheDX11\TheDX11.csproj">
+      <Project>{e3a66ba6-65aa-4c7f-a124-3c901c75ca94}</Project>
+      <Name>TheDX11</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TheMaths\TheMaths.csproj">
+      <Project>{a6932677-8d78-4f92-9e70-9f20e057409c}</Project>
+      <Name>TheMaths</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

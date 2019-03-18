@@ -40,6 +40,10 @@ namespace TheEngine.GUI.WinForms
                 case NativeMethods.WM_RBUTTONDOWN:
                     engine.inputManager.mouse.MouseDown(Input.MouseButton.Right);
                     return;
+
+                case NativeMethods.WM_MOUSEWHEEL:
+                    engine.inputManager.mouse.MouseWheel((short)((long)m.WParam >> 16));
+                    return;
             }
         }
     }

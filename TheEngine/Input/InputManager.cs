@@ -15,5 +15,10 @@ namespace TheEngine.Input
         {
             Mouse = mouse = new Mouse();
         }
+
+        internal void Update()
+        {
+            mouse.Update();
+        }
     }
 }

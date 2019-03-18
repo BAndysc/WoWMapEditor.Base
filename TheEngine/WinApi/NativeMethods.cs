@@ -14,6 +14,7 @@ namespace TheEngine.WinApi
         public const int WM_LBUTTONDBLCLK = 0x0203;
         public const int WM_RBUTTONDBLCLK = 0x0206;
 
+        public const int WM_MOUSEWHEEL = 0x020A;
         public const int WM_MOUSEMOVE = 0x0200;
         public const int WM_LBUTTONDOWN = 0x0201;
         public const int WM_LBUTTONUP = 0x0202;

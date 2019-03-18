@@ -6,5 +6,6 @@ namespace TheEngine.Input
     {
         bool IsMouseDown(MouseButton button);
         Vector2 Position { get; }
+        short WheelDelta { get; }
     }
 }

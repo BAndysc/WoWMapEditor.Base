@@ -84,6 +84,8 @@ namespace TheEngine
                 double sinceLast = sw.Elapsed.TotalMilliseconds - lastMs;
                 lastMs = sw.Elapsed.TotalMilliseconds;
                 updateLoop((float)sinceLast);
+
+                inputManager.Update();
             }
         }
 

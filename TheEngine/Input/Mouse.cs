@@ -12,9 +12,23 @@ namespace TheEngine.Input
     {
         private volatile bool leftDown;
         private volatile bool rightDown;
-        
+
+        private volatile short mouseWheelDelta;
+
         public Vector2 Position => new Vector2(Cursor.Position.X, Cursor.Position.Y);
-        
+
+        public short WheelDelta => mouseWheelDelta;
+
+        internal void Update()
+        {
+            mouseWheelDelta = 0;
+        }
+
+        internal void MouseWheel(short delta)
+        {
+            mouseWheelDelta = delta;
+        }
+
         internal void MouseDown(MouseButton button)
         {
             if (button.HasFlag(MouseButton.Left))

@@ -49,6 +49,7 @@
     <Compile Include="Data\ObjParser.cs" />
     <Compile Include="Engine.cs" />
     <Compile Include="Entities\Camera.cs" />
+    <Compile Include="Entities\Light.cs" />
     <Compile Include="Entities\Mesh.cs" />
     <Compile Include="Entities\Transform.cs" />
     <Compile Include="GUI\IHwndHost.cs" />
@@ -65,6 +66,7 @@
     <Compile Include="Interfaces\ICamera.cs" />
     <Compile Include="Interfaces\ICameraManager.cs" />
     <Compile Include="Interfaces\IConfiguration.cs" />
+    <Compile Include="Interfaces\ILightManager.cs" />
     <Compile Include="Interfaces\IMaterialManager.cs" />
     <Compile Include="Interfaces\IMesh.cs" />
     <Compile Include="Interfaces\IMeshManager.cs" />
@@ -72,6 +74,7 @@
     <Compile Include="Interfaces\IShaderManager.cs" />
     <Compile Include="Config\Configuration.cs" />
     <Compile Include="Managers\CameraManager.cs" />
+    <Compile Include="Managers\LightManager.cs" />
     <Compile Include="Managers\MeshManager.cs" />
     <Compile Include="Managers\RenderManager.cs" />
     <Compile Include="Managers\ShaderManager.cs" />

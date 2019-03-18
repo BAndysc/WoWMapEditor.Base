@@ -37,6 +37,9 @@ namespace TheEngine
         internal InputManager inputManager { get; }
         public InputManager InputManager => inputManager;
 
+        internal LightManager lightManager { get; }
+        public ILightManager LightManager => lightManager;
+
         private Thread renderThread;
 
         private volatile bool isDisposing;
@@ -54,6 +57,7 @@ namespace TheEngine
 
             Device.Initialize();
 
+            lightManager = new LightManager(this);
             inputManager = new InputManager(this);
             cameraManger = new CameraManager(this);
 
@@ -88,6 +92,7 @@ namespace TheEngine
             isDisposing = true;
             renderThread.Join();
 
+            lightManager.Dispose();
             cameraManger.Dispose();
             renderManager.Dispose();
             shaderManager.Dispose();

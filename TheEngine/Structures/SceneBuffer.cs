@@ -23,7 +23,7 @@ namespace TheEngine.Structures
     [StructLayout(LayoutKind.Sequential)]
     internal struct PixelShaderSceneBuffer
     {
-        public Vector4 LightPosition;
+        public Vector4 LightDirection;
         public Vector4 LightColor;
         public float Time;
 

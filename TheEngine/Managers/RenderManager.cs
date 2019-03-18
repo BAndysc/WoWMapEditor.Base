@@ -124,6 +124,8 @@ namespace TheEngine.Managers
             sceneData.ProjectionMatrix = proj;
             sceneData.Time = (float)engine.TotalTime;
 
+            scenePixelData.LightDirection = new Vector4(engine.lightManager.MainLight.LightDirection, 0);
+            scenePixelData.LightColor = engine.lightManager.MainLight.LightColor;
             scenePixelData.Time = (float)engine.TotalTime;
         }
 

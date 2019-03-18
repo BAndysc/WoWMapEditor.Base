@@ -19,7 +19,7 @@ cbuffer ObjectBuffer : register(b13)
 #if PIXEL_SHADER
 cbuffer SceneBuffer : register(b13)
 {
-    float4 lightPosition;
+    float4 lightDirection;
     float4 lightColor;
 
     float time;

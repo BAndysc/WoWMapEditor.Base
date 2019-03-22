@@ -15,14 +15,14 @@ namespace TheEngine.Entities
 
         private Shader shader;
 
-        private Texture[] textures;
+        private ITexture[] textures;
 
         internal Shader Shader => shader;
-        internal Texture[] Textures => textures;
+        internal ITexture[] Textures => textures;
 
         internal Material(Engine engine, ShaderHandle shaderHandle)
         {
-            textures = new Texture[1]; // @todo
+            textures = new ITexture[1]; // @todo
 
             this.engine = engine;
             this.shaderHandle = shaderHandle;

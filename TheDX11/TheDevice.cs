@@ -155,6 +155,12 @@ namespace TheDX11
         }
 
         // Safe multithread call
+        public TextureArray CreateTextureArray(int width, int height, int[][][] pixels)
+        {
+            return new TextureArray(device, width, height, pixels);
+        }
+
+        // Safe multithread call
         public Shader CreateShader(string path, string includePath = null)
         {
             return new Shader(device, path, includePath);

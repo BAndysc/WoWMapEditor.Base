@@ -31,5 +31,6 @@ cbuffer SceneBuffer : register(b13)
 
 SamplerState TheDefaultSampler : register(s15);
 
+#define tex3D(TEX, UV, INDEX) (TEX.Sample(TheDefaultSampler, float3(UV, INDEX)))
 #define tex2D(TEX, UV) (TEX.Sample(TheDefaultSampler, UV))
 #endif

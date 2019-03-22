@@ -14,12 +14,12 @@ namespace TheEngine.Managers
         private readonly Engine engine;
         private Dictionary<string, TextureHandle> texturesByPath;
         
-        private List<Texture> allTextures;
+        private List<ITexture> allTextures;
 
         internal TextureManager(Engine engine)
         {
             texturesByPath = new Dictionary<string, TextureHandle>();
-            allTextures = new List<Texture>();
+            allTextures = new List<ITexture>();
             this.engine = engine;
         }
 
@@ -58,7 +58,47 @@ namespace TheEngine.Managers
             return textureHandle;
         }
 
-        internal Texture GetTextureByHandle(TextureHandle textureHandle)
+        public TextureHandle LoadTextureArray(params string[] paths)
+        {
+            int[][][] textures = new int[paths.Length][][];
+
+            int width = 0;
+            int height = 0;
+                        
+            for (int i = 0; i < paths.Length; ++i)
+            {
+                var path = paths[i];
+
+                System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(path);
+                int[] data = new int[bitmap.Width * bitmap.Height];
+
+                width = bitmap.Width;
+                height = bitmap.Height;
+
+                textures[i] = new int[1][];
+                textures[i][0] = data;
+
+                for (int y = 0; y < bitmap.Height; ++y)
+                {
+                    for (int x = 0; x < bitmap.Width; ++x)
+                    {
+                        var pixel = bitmap.GetPixel(x, y);
+                        data[y * bitmap.Width + x] = (pixel.R) | (pixel.G << 8) | (pixel.B << 16);
+                    }
+                }
+
+                bitmap.Dispose();
+            }
+
+            var texture = engine.Device.CreateTextureArray(width, height, textures);
+            var textureHandle = new TextureHandle(allTextures.Count);
+            
+            allTextures.Add(texture);
+
+            return textureHandle;
+        }
+
+        internal ITexture GetTextureByHandle(TextureHandle textureHandle)
         {
             return allTextures[textureHandle.Handle];
         }

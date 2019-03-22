@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace TheDX11.Resources
 {
-    public class Texture : IDisposable, ITexture
+    public class TextureArray : IDisposable, ITexture
     {
         private readonly Device device;
 
@@ -19,54 +19,63 @@ namespace TheDX11.Resources
 
         private Texture2D texture { get; }
 
-        internal Texture(Device device, int[][] pixels, int width, int height)
+        internal TextureArray(Device device, int width, int height, int[][][] pixels)
         {
             this.device = device;
             Width = width;
             Height = height;
+                        
+            int mipsCount = pixels[0].Length;
+            int texturesCount = pixels.Length;
 
-            int stride = Width * 4;
-
-            List<SharpDX.DataRectangle> rectangles = new List<SharpDX.DataRectangle>();
+            int[][] rawDatas = new int[mipsCount][];
+            SharpDX.DataBox[] boxes = new SharpDX.DataBox[texturesCount * mipsCount];
             unsafe
             {
-                foreach (int[] mip in pixels)
+                for (int j = 0; j < texturesCount; ++j)
                 {
-                    fixed (int* p = mip)
+                    width = Width;
+                    height = Height;
+                    for (int i = 0; i < mipsCount; ++i)
                     {
-                        IntPtr pp = (IntPtr)p;
-                        rectangles.Add(new SharpDX.DataRectangle(pp, stride));
-                        stride /= 2;
+                        fixed (int* p = pixels[j][i])
+                        {
+                            IntPtr pp = (IntPtr)p;
+                            boxes[j * mipsCount + i] = new SharpDX.DataBox(pp, width * 4, width * height * 4);
+                        }
+                        width /= 2;
+                        height /= 2;
                     }
                 }
             }
-            
+
             texture = new Texture2D(device, new Texture2DDescription()
             {
                 Width = Width,
                 Height = Height,
-                ArraySize = 1,
+                ArraySize = texturesCount,
                 BindFlags = BindFlags.ShaderResource | BindFlags.RenderTarget,
                 Usage = ResourceUsage.Default,
                 CpuAccessFlags = CpuAccessFlags.None,
                 Format = SharpDX.DXGI.Format.R8G8B8A8_UNorm,
-                MipLevels = rectangles.Count,
+                MipLevels = mipsCount,
                 OptionFlags = ResourceOptionFlags.None,
                 SampleDescription = new SharpDX.DXGI.SampleDescription(1, 0),
-            }, rectangles.ToArray());
+            }, boxes);
 
             ShaderResourceViewDescription srvDesc = new ShaderResourceViewDescription()
             {
                 Format = texture.Description.Format,
-                Dimension = SharpDX.Direct3D.ShaderResourceViewDimension.Texture2D,
+                Dimension = SharpDX.Direct3D.ShaderResourceViewDimension.Texture2DArray,
             };
-            srvDesc.Texture2D.MostDetailedMip = 0;
-            srvDesc.Texture2D.MipLevels = -1;
+            srvDesc.Texture2DArray.MostDetailedMip = 0;
+            srvDesc.Texture2DArray.MipLevels = -1;
+            srvDesc.Texture2DArray.ArraySize = texturesCount;
+            srvDesc.Texture2DArray.FirstArraySlice = 0;
 
             TextureResource = new ShaderResourceView(device, texture, srvDesc);
         }
 
-        // Call from render thread only
         public void Activate(int slot)
         {
             device.ImmediateContext.PixelShader.SetShaderResource(slot, TextureResource);

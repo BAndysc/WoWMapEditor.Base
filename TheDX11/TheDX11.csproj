@@ -62,10 +62,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Resources\ITexture.cs" />
     <Compile Include="Resources\NativeBuffer.cs" />
     <Compile Include="Resources\Sampler.cs" />
     <Compile Include="Resources\Shader.cs" />
     <Compile Include="Resources\Texture.cs" />
+    <Compile Include="Resources\TextureArray.cs" />
     <Compile Include="TheDevice.cs" />
     <Compile Include="WinApi\NativeMethods.cs" />
   </ItemGroup>

@@ -39,6 +39,12 @@ namespace TheEngine
 
         internal LightManager lightManager { get; }
         public ILightManager LightManager => lightManager;
+        
+        internal TextureManager textureManager { get; }
+        public ITextureManager TextureManager => textureManager;
+
+        internal MaterialManager materialManager { get; }
+        public IMaterialManager MaterialManager => materialManager;
 
         private Thread renderThread;
 
@@ -61,9 +67,12 @@ namespace TheEngine
             inputManager = new InputManager(this);
             cameraManger = new CameraManager(this);
 
+            materialManager = new MaterialManager(this);
             shaderManager = new ShaderManager(this);
             meshManager = new MeshManager(this);
             renderManager = new RenderManager(this);
+
+            textureManager = new TextureManager(this);
         }
         
         public void Start()
@@ -94,6 +103,8 @@ namespace TheEngine
             isDisposing = true;
             renderThread.Join();
 
+            materialManager.Dispose();
+            textureManager.Dispose();
             lightManager.Dispose();
             cameraManger.Dispose();
             renderManager.Dispose();

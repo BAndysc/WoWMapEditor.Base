@@ -9,6 +9,8 @@ namespace TheDX11.Resources
 {
     public class Texture : IDisposable
     {
+        private readonly Device device;
+
         internal ShaderResourceView TextureResource { get; }
 
         public int Width { get; }
@@ -19,6 +21,7 @@ namespace TheDX11.Resources
 
         internal Texture(Device device, int[][] pixels, int width, int height)
         {
+            this.device = device;
             Width = width;
             Height = height;
 
@@ -61,6 +64,12 @@ namespace TheDX11.Resources
             srvDesc.Texture2D.MipLevels = -1;
 
             TextureResource = new ShaderResourceView(device, texture, srvDesc);
+        }
+
+        // Call from render thread only
+        public void Activate(int slot)
+        {
+            device.ImmediateContext.PixelShader.SetShaderResource(slot, TextureResource);
         }
 
         public void Dispose()

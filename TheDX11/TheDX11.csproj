@@ -63,6 +63,7 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources\NativeBuffer.cs" />
+    <Compile Include="Resources\Sampler.cs" />
     <Compile Include="Resources\Shader.cs" />
     <Compile Include="Resources\Texture.cs" />
     <Compile Include="TheDevice.cs" />

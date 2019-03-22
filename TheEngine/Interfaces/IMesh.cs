@@ -12,6 +12,7 @@ namespace TheEngine.Interfaces
     {
         void SetVertices(Vector3[] vertices);
         void SetIndices(int[] indices, int submesh);
+        void SetUV(Vector2[] uvs, int slot);
         void SetColors(Vector4[] colors);
         void Rebuild();
 

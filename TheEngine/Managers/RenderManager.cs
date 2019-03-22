@@ -29,7 +29,9 @@ namespace TheEngine.Managers
 
         private ICameraManager cameraManager;
         
-        private Dictionary<Shader, Dictionary<Mesh, List<Transform>>> renderers;
+        private Dictionary<Shader, Dictionary<Material, Dictionary<Mesh, List<Transform>>>> renderers;
+
+        private Sampler defaultSampler;
 
         internal RenderManager(Engine engine)
         {
@@ -44,13 +46,16 @@ namespace TheEngine.Managers
 
             instancesArray = new Matrix[1];
 
-            renderers = new Dictionary<Shader, Dictionary<Mesh, List<Transform>>>();
+            renderers = new Dictionary<Shader, Dictionary<Material, Dictionary<Mesh, List<Transform>>>>();
 
             sceneData = new SceneBuffer();
+
+            defaultSampler = engine.Device.CreateSampler();
         }
         
         public void Dispose()
         {
+            defaultSampler.Dispose();
             instancesBuffer.Dispose();
             pixelShaderSceneBuffer.Dispose();
             objectBuffer.Dispose();
@@ -71,44 +76,50 @@ namespace TheEngine.Managers
 
             objectBuffer.Activate(Constants.OBJECT_BUFFER_INDEX);
 
+            defaultSampler.Activate(Constants.DEFAULT_SAMPLER);
 
             foreach (var shaderPair in renderers)
             {
                 shaderPair.Key.Activate();
 
-                foreach (var meshPair in shaderPair.Value)
+                foreach (var materialPair in shaderPair.Value)
                 {
-                    meshPair.Key.VerticesBuffer.Activate(0);
-                    meshPair.Key.IndicesBuffer.Activate(0);
+                    for (int i = 0; i < materialPair.Key.Textures.Length; ++i)
+                        materialPair.Key.Textures[i].Activate(i);
 
-                    if (shaderPair.Key.Instancing)
+                    foreach (var meshPair in materialPair.Value)
                     {
-                        if (instancesArray.Length != meshPair.Value.Count)
-                            instancesArray = new Matrix[meshPair.Value.Count];
-                        
-                        for (int i = 0; i < meshPair.Value.Count; ++i)
+                        meshPair.Key.VerticesBuffer.Activate(0);
+                        meshPair.Key.IndicesBuffer.Activate(0);
+
+                        if (shaderPair.Key.Instancing)
                         {
-                            instancesArray[i] = meshPair.Value[i].LocalToWorldMatrix;
-                        }
-                        instancesBuffer.UpdateBuffer(instancesArray);
-                        instancesBuffer.Activate(1);
+                            if (instancesArray.Length != meshPair.Value.Count)
+                                instancesArray = new Matrix[meshPair.Value.Count];
 
-                        engine.Device.DrawIndexedInstanced(meshPair.Key.IndexCount, meshPair.Value.Count, 0, 0, 0);
-                    }
-                    else
-                    {
-                        foreach (var instance in meshPair.Value)
+                            for (int i = 0; i < meshPair.Value.Count; ++i)
+                            {
+                                instancesArray[i] = meshPair.Value[i].LocalToWorldMatrix;
+                            }
+                            instancesBuffer.UpdateBuffer(instancesArray);
+                            instancesBuffer.Activate(1);
+
+                            engine.Device.DrawIndexedInstanced(meshPair.Key.IndexCount, meshPair.Value.Count, 0, 0, 0);
+                        }
+                        else
                         {
-                            Matrix.Transpose(ref instance.LocalToWorldMatrix, out objectData.WorldMatrix);
-                            objectBuffer.UpdateBuffer(ref objectData);
-                            engine.Device.DrawIndexed(meshPair.Key.IndexCount, 0, 0);
+                            foreach (var instance in meshPair.Value)
+                            {
+                                Matrix.Transpose(ref instance.LocalToWorldMatrix, out objectData.WorldMatrix);
+                                objectBuffer.UpdateBuffer(ref objectData);
+                                engine.Device.DrawIndexed(meshPair.Key.IndexCount, 0, 0);
+                            }
                         }
+
+
                     }
-
-
                 }
             }
-
             engine.Device.RenderBlitBuffer();
         }
 
@@ -129,18 +140,21 @@ namespace TheEngine.Managers
             scenePixelData.Time = (float)engine.TotalTime;
         }
 
-        public RenderHandle RegisterRenderer(MeshHandle meshHandle, ShaderHandle materialHandle, Transform transform)
+        public RenderHandle RegisterRenderer(MeshHandle meshHandle, Material material, Transform transform)
         {
             var mesh = engine.meshManager.GetMeshByHandle(meshHandle);
-            var shader = engine.shaderManager.GetShaderByHandle(materialHandle);
+            var shader = material.Shader;
 
             if (!renderers.ContainsKey(shader))
-                renderers[shader] = new Dictionary<Mesh, List<Transform>>();
+                renderers[shader] = new Dictionary<Material, Dictionary<Mesh, List<Transform>>>();
 
-            if (!renderers[shader].ContainsKey(mesh))
-                renderers[shader][mesh] = new List<Transform>();
+            if (!renderers[shader].ContainsKey(material))
+                renderers[shader][material] = new Dictionary<Mesh, List<Transform>>();
 
-            renderers[shader][mesh].Add(transform);
+            if (!renderers[shader][material].ContainsKey(mesh))
+                renderers[shader][material][mesh] = new List<Transform>();
+
+            renderers[shader][material][mesh].Add(transform);
 
             return new RenderHandle();
         }

@@ -50,7 +50,8 @@ namespace TheEngine.Managers
                 vertices[i] = new UniversalVertex()
                 {
                     position = new Vector4(meshData.Vertices[i], 1),
-                    normal = new Vector4(meshData.Normals[i], 0)
+                    normal = new Vector4(meshData.Normals[i], 0),
+                    uv1 = meshData.UV[i]
                 };
             }
             

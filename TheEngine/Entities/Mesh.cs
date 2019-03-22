@@ -53,6 +53,16 @@ namespace TheEngine.Entities
             this.vertices = vertices.Select(t => new UniversalVertex() { position = new Vector4(t, 1) }).ToArray();
         }
 
+        public void SetUV(Vector2[] uvs, int slot)
+        {
+            if (slot == 0)
+                this.vertices = vertices.Zip(uvs, (vert, uv) => new UniversalVertex(vert) { uv1 = uv }).ToArray();
+            else if (slot == 1)
+                this.vertices = vertices.Zip(uvs, (vert, uv) => new UniversalVertex(vert) { uv2 = uv }).ToArray();
+            else
+                throw new ArgumentException();
+        }
+
         public void SetColors(Vector4[] colors)
         {
             this.vertices = vertices.Zip(colors, (vert, col) => new UniversalVertex(vert) { color = col }).ToArray();

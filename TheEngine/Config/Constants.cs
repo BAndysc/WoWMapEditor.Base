@@ -8,6 +8,9 @@ namespace TheEngine.Config
 {
     internal class Constants
     {
+
+        internal static int DEFAULT_SAMPLER = 15;
+
         internal static int SCENE_BUFFER_INDEX = 12;
         internal static int OBJECT_BUFFER_INDEX = 13;
 

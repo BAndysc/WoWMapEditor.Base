@@ -10,7 +10,7 @@ namespace TheEngine.Interfaces
 {
     public interface IRenderManager
     {
-        RenderHandle RegisterRenderer(MeshHandle mesh, ShaderHandle materialHandle, Transform transform);
+        RenderHandle RegisterRenderer(MeshHandle mesh, Material material, Transform transform);
         void UnregisterRenderer(RenderHandle renderHandle);
     }
 }

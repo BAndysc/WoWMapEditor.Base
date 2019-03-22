@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using TheEngine.Entities;
 using TheEngine.Handles;
 
 namespace TheEngine.Interfaces
 {
-    public interface IMaterialManager
+    public interface ITextureManager
     {
-        Material CreateMaterial(ShaderHandle shader);
+        TextureHandle LoadTexture(string path);
     }
 }

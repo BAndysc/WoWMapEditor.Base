@@ -28,4 +28,8 @@ cbuffer SceneBuffer : register(b13)
     float align2;
     float align3;
 };
+
+SamplerState TheDefaultSampler : register(s15);
+
+#define tex2D(TEX, UV) (TEX.Sample(TheDefaultSampler, UV))
 #endif

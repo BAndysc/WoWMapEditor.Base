@@ -155,7 +155,7 @@ namespace TheDX11.Resources
                     inputElements.Add(new InputElement()
                     {
                         SemanticName = "TEXCOORD",
-                        SemanticIndex = j,
+                        SemanticIndex = j + 1,
                         Format = SharpDX.DXGI.Format.R32G32B32A32_Float,
                         Slot = 1,
                         AlignedByteOffset = j == 1 ? 0 : InputElement.AppendAligned,

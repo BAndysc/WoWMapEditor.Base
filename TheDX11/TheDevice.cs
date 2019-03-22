@@ -143,6 +143,12 @@ namespace TheDX11
         }
 
         // Safe multithread call
+        public Sampler CreateSampler(/* todo */)
+        {
+            return new Sampler(device);
+        }
+
+        // Safe multithread call
         public Texture CreateTexture(int width, int height, int[][] pixels)
         {
             return new Texture(device, pixels, width, height);

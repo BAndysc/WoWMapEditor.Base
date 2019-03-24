@@ -55,7 +55,7 @@ namespace TheDX11
             };
             
 
-            Device.CreateWithSwapChain(DriverType.Hardware, flags, new FeatureLevel[] { FeatureLevel.Level_11_1 }, swapChainDescription, out device, out swapChain);
+            Device.CreateWithSwapChain(DriverType.Hardware, flags, new FeatureLevel[] { FeatureLevel.Level_11_0 }, swapChainDescription, out device, out swapChain);
 
 
             // New RenderTargetView from the backbuffer

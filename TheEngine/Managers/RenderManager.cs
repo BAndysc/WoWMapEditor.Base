@@ -61,9 +61,10 @@ namespace TheEngine.Managers
             objectBuffer.Dispose();
             sceneBuffer.Dispose();
         }
-
+        
         internal void Render()
         {
+            Mesh currentMesh = null;
             UpdateSceneBuffer();
 
             engine.Device.RenerClearBuffer();
@@ -84,13 +85,26 @@ namespace TheEngine.Managers
 
                 foreach (var materialPair in shaderPair.Value)
                 {
-                    for (int i = 0; i < materialPair.Key.Textures.Length; ++i)
-                        materialPair.Key.Textures[i].Activate(i);
+                    foreach (var texturePair in materialPair.Key.textures)
+                        texturePair.Value.Activate(texturePair.Key);
+
+                    foreach (var bufferKeyPair in materialPair.Key.structuredBuffers)
+                        bufferKeyPair.Value.Activate(bufferKeyPair.Key);
+
+                    foreach (var bufferKeyPair in materialPair.Key.structuredPixelsBuffers)
+                        bufferKeyPair.Value.Activate(bufferKeyPair.Key);
+
+                    foreach (var bufferKeyPair in materialPair.Key.structuredVertexBuffers)
+                        bufferKeyPair.Value.Activate(bufferKeyPair.Key);
 
                     foreach (var meshPair in materialPair.Value)
                     {
-                        meshPair.Key.VerticesBuffer.Activate(0);
-                        meshPair.Key.IndicesBuffer.Activate(0);
+                        if (currentMesh != meshPair.Key)
+                        {
+                            meshPair.Key.VerticesBuffer.Activate(0);
+                            meshPair.Key.IndicesBuffer.Activate(0);
+                            currentMesh = meshPair.Key;
+                        }
 
                         if (shaderPair.Key.Instancing)
                         {
@@ -110,13 +124,11 @@ namespace TheEngine.Managers
                         {
                             foreach (var instance in meshPair.Value)
                             {
-                                Matrix.Transpose(ref instance.LocalToWorldMatrix, out objectData.WorldMatrix);
+                                objectData.WorldMatrix = instance.LocalToWorldMatrix;
                                 objectBuffer.UpdateBuffer(ref objectData);
                                 engine.Device.DrawIndexed(meshPair.Key.IndexCount, 0, 0);
                             }
                         }
-
-
                     }
                 }
             }
@@ -126,10 +138,8 @@ namespace TheEngine.Managers
         private void UpdateSceneBuffer()
         {
             var camera = cameraManager.MainCamera;
-            var proj = Matrix.PerspectiveFovRH(camera.FOVRad, 1, camera.NearClip, camera.FarClip);
-            proj.Transpose();
+            var proj = Matrix.PerspectiveFovRH(camera.FOVRad, engine.WindowHost.Aspect, camera.NearClip, camera.FarClip);
             var vm = camera.Transform.WorldToLocalMatrix;
-            vm.Transpose();
 
             sceneData.ViewMatrix = vm;
             sceneData.ProjectionMatrix = proj;

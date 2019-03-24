@@ -48,18 +48,24 @@ namespace TheEngine
 
         private Thread renderThread;
 
+        internal IHwndHost WindowHost => windowHost;
+
         private volatile bool isDisposing;
+        private readonly IHwndHost windowHost;
+        private readonly Action onStart;
         private readonly Action<float> updateLoop;
 
         public double TotalTime;
 
-        public Engine(IConfiguration configuration, IHwndHost windowHost, Action<float> updateLoop)
+        public Engine(IConfiguration configuration, IHwndHost windowHost, Action onStart, Action<float> updateLoop)
         {
             windowHost.Bind(this);
 
             Configuration = configuration;
+            this.windowHost = windowHost;
+            this.onStart = onStart;
             this.updateLoop = updateLoop;
-            Device = new TheDevice(windowHost.Handle, true);
+            Device = new TheDevice(windowHost.Handle, false);
 
             Device.Initialize();
 
@@ -83,6 +89,8 @@ namespace TheEngine
 
         private void RenderThread()
         {
+            onStart();
+
             Stopwatch sw = new Stopwatch();
             sw.Start();
             double lastMs = 0;

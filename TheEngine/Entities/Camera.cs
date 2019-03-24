@@ -27,7 +27,7 @@ namespace TheEngine.Entities
             Transform = new Transform();
             FOV = 65;
             NearClip = 0.1f;
-            FarClip = 200f;
+            FarClip = 33600f;
         }
     }
 }

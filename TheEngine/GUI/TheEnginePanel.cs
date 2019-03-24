@@ -12,6 +12,8 @@ namespace TheEngine.GUI.WinForms
     {
         private Engine engine;
 
+        public float Aspect => Width * 1.0f / Height;
+
         public void Bind(Engine engine)
         {
             this.engine = engine;

@@ -58,6 +58,16 @@ namespace TheEngine.Managers
             return textureHandle;
         }
 
+        public TextureHandle CreateTextureArray(int[][][] textures, int width, int height)
+        {
+            var texture = engine.Device.CreateTextureArray(width, height, textures);
+            var textureHandle = new TextureHandle(allTextures.Count);
+
+            allTextures.Add(texture);
+
+            return textureHandle;
+        }
+
         public TextureHandle LoadTextureArray(params string[] paths)
         {
             int[][][] textures = new int[paths.Length][][];

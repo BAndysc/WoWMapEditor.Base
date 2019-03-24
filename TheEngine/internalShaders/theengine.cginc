@@ -1,8 +1,8 @@
 #if VERTEX_SHADER
 cbuffer SceneBuffer : register(b12)
 {
-    matrix viewMatrix;
-    matrix projectionMatrix;
+    row_major matrix viewMatrix;
+    row_major matrix projectionMatrix;
     float time;
 
     float align1;
@@ -12,7 +12,7 @@ cbuffer SceneBuffer : register(b12)
 
 cbuffer ObjectBuffer : register(b13)
 {
-    matrix worldMatrix;
+    row_major matrix worldMatrix;
 };
 #endif
 

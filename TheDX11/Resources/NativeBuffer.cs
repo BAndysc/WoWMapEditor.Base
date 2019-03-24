@@ -15,9 +15,17 @@ namespace TheDX11.Resources
         Index,
         ConstPixel,
         ConstVertex,
+        StructuredBuffer,
+        StructuredBufferVertexOnly,
+        StructuredBufferPixelOnly
     }
 
-    public class NativeBuffer<T> : IDisposable where T : struct
+    public interface INativeBuffer
+    {
+        void Activate(int slot);
+    }
+
+    public class NativeBuffer<T> : IDisposable, INativeBuffer where T : struct
     {
         private readonly Device device;
 
@@ -28,6 +36,8 @@ namespace TheDX11.Resources
         internal Buffer Buffer { get; private set; }
         
         internal VertexBufferBinding VertexBufferBinding { get; private set; }
+
+        internal ShaderResourceView shaderView { get; private set; }
 
         internal NativeBuffer(Device device, BufferTypeEnum bufferType, int length)
         {
@@ -47,34 +57,55 @@ namespace TheDX11.Resources
             CreateBufferWithData(data);
         }
 
-        private void CreateBuffer()
+        private bool IsStructuredBuffer => BufferType == BufferTypeEnum.StructuredBuffer || BufferType == BufferTypeEnum.StructuredBufferPixelOnly || BufferType == BufferTypeEnum.StructuredBufferVertexOnly;
+
+        private BufferDescription GetBufferDescription()
         {
-            BufferDescription bufferDesc = new BufferDescription()
+            return new BufferDescription()
             {
                 Usage = ResourceUsage.Default,
                 SizeInBytes = Utilities.SizeOf<T>() * Length, // Must be divisable by 16 bytes, so this is equated to 32 (?)
                 BindFlags = BufferTypeToBindFlags(BufferType),
                 CpuAccessFlags = CpuAccessFlags.None,
-                OptionFlags = ResourceOptionFlags.None,
-                StructureByteStride = 0
+                OptionFlags = IsStructuredBuffer ? ResourceOptionFlags.BufferStructured : ResourceOptionFlags.None,
+                StructureByteStride = IsStructuredBuffer ? Utilities.SizeOf<T>() : 0,
             };
+        }
+
+        private void CreateShaderView()
+        {
+            if (!IsStructuredBuffer)
+                return;
+
+            if (shaderView != null)
+                shaderView.Dispose();
+
+            var desc = new ShaderResourceViewDescription()
+            {
+                Format = SharpDX.DXGI.Format.Unknown,
+                Dimension = SharpDX.Direct3D.ShaderResourceViewDimension.ExtendedBuffer
+            };
+            desc.BufferEx.FirstElement = 0;
+            desc.BufferEx.ElementCount = Length;
+            desc.BufferEx.Flags = 0;
+
+            shaderView = new ShaderResourceView(device, Buffer, desc);
+        }
+
+        private void CreateBuffer()
+        {
+            BufferDescription bufferDesc = GetBufferDescription();
             Buffer = new Buffer(device, bufferDesc);
             VertexBufferBinding = new VertexBufferBinding(Buffer, Utilities.SizeOf<T>(), 0);
+            CreateShaderView();
         }
 
         private void CreateBufferWithData(T[] data)
         {
-            BufferDescription bufferDesc = new BufferDescription()
-            {
-                Usage = ResourceUsage.Default,
-                SizeInBytes = Utilities.SizeOf<T>() * Length, // Must be divisable by 16 bytes, so this is equated to 32 (?)
-                BindFlags = BufferTypeToBindFlags(BufferType),
-                CpuAccessFlags = CpuAccessFlags.None,
-                OptionFlags = ResourceOptionFlags.None,
-                StructureByteStride = 0
-            };
+            BufferDescription bufferDesc = GetBufferDescription();
             Buffer = Buffer.Create(device, data, bufferDesc);
             VertexBufferBinding = new VertexBufferBinding(Buffer, Utilities.SizeOf<T>(), 0);
+            CreateShaderView();
         }
 
         // this method can be called only from render thread
@@ -105,6 +136,10 @@ namespace TheDX11.Resources
         {
             switch (bufferType)
             {
+                case BufferTypeEnum.StructuredBuffer:
+                case BufferTypeEnum.StructuredBufferPixelOnly:
+                case BufferTypeEnum.StructuredBufferVertexOnly:
+                    return BindFlags.ShaderResource | BindFlags.UnorderedAccess;
                 case BufferTypeEnum.Vertex:
                     return BindFlags.VertexBuffer;
                 case BufferTypeEnum.Index:
@@ -135,6 +170,19 @@ namespace TheDX11.Resources
             {
                 device.ImmediateContext.VertexShader.SetConstantBuffer(slot, Buffer);
             }
+            else if (BufferType == BufferTypeEnum.StructuredBuffer)
+            {
+                device.ImmediateContext.PixelShader.SetShaderResource(slot, shaderView);
+                device.ImmediateContext.VertexShader.SetShaderResource(slot, shaderView);
+            }
+            else if (BufferType == BufferTypeEnum.StructuredBufferPixelOnly)
+            {
+                device.ImmediateContext.PixelShader.SetShaderResource(slot, shaderView);
+            }
+            else if (BufferType == BufferTypeEnum.StructuredBufferVertexOnly)
+            {
+                device.ImmediateContext.VertexShader.SetShaderResource(slot, shaderView);
+            }
             else
             {
                 throw new Exception("Unsupported buffer type");
@@ -143,6 +191,9 @@ namespace TheDX11.Resources
 
         public void Dispose()
         {
+            shaderView?.Dispose();
+            shaderView = null;
+
             Buffer.Dispose();
             Buffer = null;
         }

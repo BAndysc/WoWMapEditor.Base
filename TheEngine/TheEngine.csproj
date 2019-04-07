@@ -62,8 +62,10 @@
     <Compile Include="Handles\RenderHandle.cs" />
     <Compile Include="Handles\ShaderHandle.cs" />
     <Compile Include="Handles\TextureHandle.cs" />
+    <Compile Include="Input\IKeyboard.cs" />
     <Compile Include="Input\IMouse.cs" />
     <Compile Include="Input\InputManager.cs" />
+    <Compile Include="Input\Keyboard.cs" />
     <Compile Include="Input\Mouse.cs" />
     <Compile Include="Interfaces\ICamera.cs" />
     <Compile Include="Interfaces\ICameraManager.cs" />
@@ -83,6 +85,8 @@
     <Compile Include="Managers\RenderManager.cs" />
     <Compile Include="Managers\ShaderManager.cs" />
     <Compile Include="Managers\TextureManager.cs" />
+    <Compile Include="Primitives\SkyboxMesh.cs" />
+    <Compile Include="Primitives\SphereFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Structures\SceneBuffer.cs" />
     <Compile Include="Structures\UniversalVertex.cs" />

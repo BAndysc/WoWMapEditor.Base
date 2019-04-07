@@ -17,8 +17,8 @@ namespace TheEngine.Data
         public MeshData(Vector3[] vertices, Vector3[] normals, Vector2[] uvs, int[] indices)
         {
             Vertices = vertices;
-            Normals = normals;
-            UV = uvs;
+            Normals = normals == null ? new Vector3[vertices.Length] : normals;
+            UV = uvs == null ? new Vector2[vertices.Length] : uvs;
             Indices = indices;
         }
     }

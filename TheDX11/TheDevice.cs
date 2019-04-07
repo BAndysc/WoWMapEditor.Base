@@ -23,7 +23,6 @@ namespace TheDX11
         private SwapChain swapChain;
         private RenderTargetView renderTargetView;
         private Texture2D depthStencilBuffer;
-        private DepthStencilState depthStencilState;
         private DepthStencilView depthStencilView;
         private RasterizerState rasterizerState;
 
@@ -79,31 +78,6 @@ namespace TheDX11
             };
             depthStencilBuffer = new Texture2D(device, depthBufferDesc);
 
-            DepthStencilStateDescription depthStencilDesc = new DepthStencilStateDescription()
-            {
-                IsDepthEnabled = true,
-                DepthWriteMask = DepthWriteMask.All,
-                DepthComparison = Comparison.Less,
-                IsStencilEnabled = true,
-                StencilReadMask = 0xFF,
-                StencilWriteMask = 0xFF,
-                FrontFace = new DepthStencilOperationDescription()
-                {
-                    FailOperation = StencilOperation.Keep,
-                    DepthFailOperation = StencilOperation.Increment,
-                    PassOperation = StencilOperation.Keep,
-                    Comparison = Comparison.Always
-                },
-                BackFace = new DepthStencilOperationDescription()
-                {
-                    FailOperation = StencilOperation.Keep,
-                    DepthFailOperation = StencilOperation.Decrement,
-                    PassOperation = StencilOperation.Keep,
-                    Comparison = Comparison.Always
-                }
-            };
-            depthStencilState = new DepthStencilState(device, depthStencilDesc);
-
             DepthStencilViewDescription depthStencilViewDesc = new DepthStencilViewDescription()
             {
                 Format = Format.D24_UNorm_S8_UInt,
@@ -118,7 +92,7 @@ namespace TheDX11
             RasterizerStateDescription rasterDesc = new RasterizerStateDescription()
             {
                 IsAntialiasedLineEnabled = false,
-                CullMode = CullMode.None,
+                CullMode = CullMode.Back,
                 DepthBias = 0,
                 DepthBiasClamp = .0f,
                 IsDepthClipEnabled = true,
@@ -130,9 +104,7 @@ namespace TheDX11
             };
             rasterizerState = new RasterizerState(device, rasterDesc);
 
-
             device.ImmediateContext.Rasterizer.SetViewport(0, 0, size.Width, size.Height);
-            device.ImmediateContext.OutputMerger.SetDepthStencilState(depthStencilState, 1);
             device.ImmediateContext.OutputMerger.SetTargets(depthStencilView, renderTargetView);
             device.ImmediateContext.Rasterizer.State = rasterizerState;
         }
@@ -161,9 +133,15 @@ namespace TheDX11
         }
 
         // Safe multithread call
-        public Shader CreateShader(string path, string includePath = null)
+        public TextureCube CreateTextureCube(int width, int height, int[][] pixels)
         {
-            return new Shader(device, path, includePath);
+            return new TextureCube(device, pixels, width, height);
+        }
+
+        // Safe multithread call
+        public Shader CreateShader(string path, string[] includePaths)
+        {
+            return new Shader(device, path, includePaths);
         }
 
         // Safe multithread call
@@ -174,6 +152,11 @@ namespace TheDX11
         public NativeBuffer<T> CreateBuffer<T>(BufferTypeEnum bufferType, T[] data) where T : struct
         {
             return new NativeBuffer<T>(device, bufferType, data);
+        }
+
+        public DepthStencil CreateDepthStencilState(bool zWrite)
+        {
+            return new DepthStencil(device, zWrite);
         }
 
         // call only form render thread
@@ -199,14 +182,13 @@ namespace TheDX11
         // Call only from render thread
         public void RenderBlitBuffer()
         {
-            swapChain.Present(0, PresentFlags.None);
+            swapChain.Present(1, PresentFlags.None);
         }
 
         public void Dispose()
         {
             rasterizerState.Dispose();
             depthStencilView.Dispose();
-            depthStencilState.Dispose();
             depthStencilBuffer.Dispose();
             renderTargetView.Dispose();
             swapChain.Dispose();

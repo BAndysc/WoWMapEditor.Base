@@ -11,6 +11,7 @@ namespace TheEngine.Interfaces
     {
         TextureHandle LoadTexture(string path);
         TextureHandle LoadTextureArray(params string[] path);
+        TextureHandle LoadTextureCube(params string[] paths);
         TextureHandle CreateTextureArray(int[][][] pixels, int width, int height);
     }
 }

@@ -22,15 +22,17 @@ namespace TheDX11.Resources
 
         public bool Instancing { get; }
 
+        public bool ZWrite { get; }
+
         public class ShaderInclude : Include
         {
-            private readonly string incPath;
+            private readonly string[] incPaths;
 
             public IDisposable Shadow { get; set; }
 
-            public ShaderInclude(string incPath)
+            public ShaderInclude(string[] incPaths)
             {
-                this.incPath = incPath;
+                this.incPaths = incPaths;
             }
 
             public void Close(Stream stream)
@@ -45,22 +47,28 @@ namespace TheDX11.Resources
 
             public Stream Open(IncludeType type, string fileName, Stream parentStream)
             {
-                return new FileStream(incPath + "/" + fileName, FileMode.Open);
+                foreach (var dir in incPaths)
+                {
+                    if (File.Exists(dir + "/" + fileName))
+                        return new FileStream(dir + "/" + fileName, FileMode.Open);
+                }
+                throw new Exception();
             }
         }
 
-        internal Shader(Device device, string shaderFile, string includePath = null)
+        internal Shader(Device device, string shaderFile, string[] includePaths)
         {
             var shaderContent = File.ReadAllText(shaderFile);
             var shaderData = JsonConvert.DeserializeObject<ShaderData>(shaderContent);
 
             var shaderDir = Path.GetDirectoryName(shaderFile);
 
-            var shaderInclude = new ShaderInclude(includePath);
+            var shaderInclude = new ShaderInclude(includePaths);
 
             var vertexMacros = new List<ShaderMacro> { new ShaderMacro("VERTEX_SHADER", 1) };
             var pixelMacros = new List<ShaderMacro> { new ShaderMacro("PIXEL_SHADER", 1) };
 
+            ZWrite = shaderData.ZWrite;
             Instancing = shaderData.Instancing;
             if (Instancing)
             {
@@ -163,16 +171,6 @@ namespace TheDX11.Resources
                         InstanceDataStepRate = 1
                     });
                 }
-                //inputElements.Add(new InputElement()
-                //{
-                //    SemanticName = "SV_InstanceID",
-                //    SemanticIndex = 0,
-                //    Format = SharpDX.DXGI.Format.R32_UInt,
-                //    Slot = 2,
-                //    AlignedByteOffset = InputElement.AppendAligned,
-                //    Classification = InputClassification.PerInstanceData,
-                //    InstanceDataStepRate = 1
-                //});
             }
 
             return inputElements.ToArray();
@@ -207,5 +205,7 @@ namespace TheDX11.Resources
         public PixelVertexData Vertex { get; set; }
         public int Textures { get; set; }
         public bool Instancing { get; set; }
+
+        public bool ZWrite { get; set; }
     }
 }

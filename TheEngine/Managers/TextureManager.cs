@@ -107,6 +107,44 @@ namespace TheEngine.Managers
 
             return textureHandle;
         }
+        public TextureHandle LoadTextureCube(params string[] paths)
+        {
+            if (paths.Length != 6)
+                throw new Exception();
+            int[][] textures = new int[paths.Length][];
+
+            int width = 0;
+            int height = 0;
+
+            for (int i = 0; i < paths.Length; ++i)
+            {
+                var path = paths[i];
+
+                System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(path);
+                width = bitmap.Width;
+                height = bitmap.Height;
+
+                textures[i] = new int[bitmap.Width * bitmap.Height];
+
+                for (int y = 0; y < bitmap.Height; ++y)
+                {
+                    for (int x = 0; x < bitmap.Width; ++x)
+                    {
+                        var pixel = bitmap.GetPixel(x, y);
+                        textures[i][y * bitmap.Width + x] = (pixel.R) | (pixel.G << 8) | (pixel.B << 16);
+                    }
+                }
+
+                bitmap.Dispose();
+            }
+
+            var texture = engine.Device.CreateTextureCube(width, height, textures);
+            var textureHandle = new TextureHandle(allTextures.Count);
+
+            allTextures.Add(texture);
+
+            return textureHandle;
+        }
 
         internal ITexture GetTextureByHandle(TextureHandle textureHandle)
         {

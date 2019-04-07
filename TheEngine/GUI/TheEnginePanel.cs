@@ -14,9 +14,17 @@ namespace TheEngine.GUI.WinForms
 
         public float Aspect => Width * 1.0f / Height;
 
+        public float WindowWidth { get; private set; }
+
+        public float WindowHeight { get; private set; }
+
         public void Bind(Engine engine)
         {
             this.engine = engine;
+            WindowWidth = Width;
+            WindowHeight = Height;
+
+            NativeMethods.SetFocus(Handle);
         }
 
         protected override void WndProc(ref Message m)
@@ -28,12 +36,26 @@ namespace TheEngine.GUI.WinForms
 
             switch (m.Msg)
             {
+                case NativeMethods.WM_SIZE:
+                    WindowWidth = Width;
+                    WindowHeight = Height;
+                    return;
+
+                case NativeMethods.WM_KEYDOWN:
+                    engine.inputManager.keyboard.KeyDown((System.Windows.Forms.Keys)m.WParam);
+                    return;
+
+                case NativeMethods.WM_KEYUP:
+                    engine.inputManager.keyboard.KeyUp((System.Windows.Forms.Keys)m.WParam);
+                    return;
+
                 case NativeMethods.WM_LBUTTONUP:
                     engine.inputManager.mouse.MouseUp(Input.MouseButton.Left);
                     return;
                 case NativeMethods.WM_LBUTTONDBLCLK:
                 case NativeMethods.WM_LBUTTONDOWN:
                     engine.inputManager.mouse.MouseDown(Input.MouseButton.Left);
+                    NativeMethods.SetFocus(Handle);
                     return;
                 case NativeMethods.WM_RBUTTONUP:
                     engine.inputManager.mouse.MouseUp(Input.MouseButton.Right);

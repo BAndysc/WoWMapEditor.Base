@@ -11,9 +11,14 @@ namespace TheEngine.Input
         internal Mouse mouse { get; }
         public IMouse Mouse { get; }
 
+        internal Keyboard keyboard { get; }
+
+        public IKeyboard Keyboard { get; }
+
         internal InputManager(Engine engine)
         {
-            Mouse = mouse = new Mouse();
+            Mouse = mouse = new Mouse(engine.WindowHost);
+            Keyboard = keyboard = new Keyboard(engine.WindowHost);
         }
 
         internal void Update()

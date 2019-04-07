@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using TheEngine.GUI;
 using TheMaths;
 
 namespace TheEngine.Input
@@ -14,10 +15,16 @@ namespace TheEngine.Input
         private volatile bool rightDown;
 
         private volatile short mouseWheelDelta;
+        private readonly IHwndHost window;
 
-        public Vector2 Position => new Vector2(Cursor.Position.X, Cursor.Position.Y);
+        public Vector2 Position => new Vector2(Cursor.Position.X / window.WindowWidth, Cursor.Position.Y / window.WindowHeight);
 
         public short WheelDelta => mouseWheelDelta;
+
+        internal Mouse(IHwndHost window)
+        {
+            this.window = window;
+        }
 
         internal void Update()
         {

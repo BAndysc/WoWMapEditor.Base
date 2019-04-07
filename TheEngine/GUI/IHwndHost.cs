@@ -11,5 +11,7 @@ namespace TheEngine.GUI
         void Bind(Engine engine);
         IntPtr Handle { get; }
         float Aspect { get; }
+        float WindowWidth { get; }
+        float WindowHeight { get; }
     }
 }

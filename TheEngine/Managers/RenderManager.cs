@@ -33,6 +33,11 @@ namespace TheEngine.Managers
 
         private Sampler defaultSampler;
 
+        private DepthStencil depthStencilZWrite;
+        private DepthStencil depthStencilNoZWrite;
+
+        private bool? currentZwrite;
+
         internal RenderManager(Engine engine)
         {
             this.engine = engine;
@@ -51,10 +56,26 @@ namespace TheEngine.Managers
             sceneData = new SceneBuffer();
 
             defaultSampler = engine.Device.CreateSampler();
+
+            depthStencilZWrite = engine.Device.CreateDepthStencilState(true);
+            depthStencilNoZWrite = engine.Device.CreateDepthStencilState(false);
         }
-        
+        private void SetZWrite(bool zwrite)
+        {
+            if (!currentZwrite.HasValue || currentZwrite.Value != zwrite)
+            {
+                if (zwrite)
+                    depthStencilZWrite.Activate();
+                else
+                    depthStencilNoZWrite.Activate();
+                currentZwrite = zwrite;
+            }
+        }
+
         public void Dispose()
         {
+            depthStencilZWrite.Dispose();
+            depthStencilNoZWrite.Dispose();
             defaultSampler.Dispose();
             instancesBuffer.Dispose();
             pixelShaderSceneBuffer.Dispose();
@@ -85,6 +106,8 @@ namespace TheEngine.Managers
 
                 foreach (var materialPair in shaderPair.Value)
                 {
+                    SetZWrite(materialPair.Key.Shader.ZWrite);
+
                     foreach (var texturePair in materialPair.Key.textures)
                         texturePair.Value.Activate(texturePair.Key);
 

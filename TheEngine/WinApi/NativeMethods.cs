@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,6 +14,9 @@ namespace TheEngine.WinApi
 
         public const int WM_LBUTTONDBLCLK = 0x0203;
         public const int WM_RBUTTONDBLCLK = 0x0206;
+        public const int WM_SIZE = 0x0005;
+        public const int WM_ACTIVATE = 0x0006;
+        public const int WM_SETFOCUS = 0x0007;
 
         public const int WM_MOUSEWHEEL = 0x020A;
         public const int WM_MOUSEMOVE = 0x0200;
@@ -23,5 +27,8 @@ namespace TheEngine.WinApi
         public const int WM_KEYDOWN = 0x100;
         public const int WM_KEYUP = 0x101;
         public const int WM_KILLFOCUS = 0x0008;
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern IntPtr SetFocus(IntPtr hWnd);
     }
 }

@@ -24,14 +24,25 @@ namespace TheEngine.Managers
             this.engine = engine;
         }
 
+        private string RemoveFileName(string path)
+        {
+            int lastSplash = path.LastIndexOf("/");
+
+            if (lastSplash == -1)
+                return ".";
+
+            return path.Substring(0, lastSplash);
+        }
+
         public ShaderHandle LoadShader(string path)
         {
             path = engine.Configuration.ShaderDirectory + "/" + path;
+            var shaderDir = RemoveFileName(path);
 
             if (shaderHandles.TryGetValue(path, out var shader))
                 return shader;
 
-            var newShader = engine.Device.CreateShader(path, Constants.SHADER_INCLUDE_DIR);
+            var newShader = engine.Device.CreateShader(path, new string[] { Constants.SHADER_INCLUDE_DIR, shaderDir });
 
             byHandleShaders.Add(newShader);
 

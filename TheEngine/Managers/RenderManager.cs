@@ -8,6 +8,7 @@ using TheEngine.Config;
 using TheEngine.Entities;
 using TheEngine.Handles;
 using TheEngine.Interfaces;
+using TheEngine.Primitives;
 using TheEngine.Structures;
 using TheMaths;
 
@@ -29,7 +30,7 @@ namespace TheEngine.Managers
 
         private ICameraManager cameraManager;
         
-        private Dictionary<Shader, Dictionary<Material, Dictionary<Mesh, List<Transform>>>> renderers;
+        private Dictionary<ShaderHandle, Dictionary<Material, Dictionary<Mesh, List<Transform>>>> renderers;
 
         private Sampler defaultSampler;
 
@@ -37,6 +38,22 @@ namespace TheEngine.Managers
         private DepthStencil depthStencilNoZWrite;
 
         private bool? currentZwrite;
+
+        private RenderTexture renderTexture;
+
+        private RenderTexture outlineTexture;
+
+        private IMesh planeMesh;
+
+        private ShaderHandle blitShader;
+
+        private Material blitMaterial;
+
+        private Material unlitMaterial;
+
+        private Mesh currentMesh = null;
+
+        private Shader currentShader = null;
 
         internal RenderManager(Engine engine)
         {
@@ -51,7 +68,7 @@ namespace TheEngine.Managers
 
             instancesArray = new Matrix[1];
 
-            renderers = new Dictionary<Shader, Dictionary<Material, Dictionary<Mesh, List<Transform>>>>();
+            renderers = new Dictionary<ShaderHandle, Dictionary<Material, Dictionary<Mesh, List<Transform>>>>();
 
             sceneData = new SceneBuffer();
 
@@ -59,7 +76,19 @@ namespace TheEngine.Managers
 
             depthStencilZWrite = engine.Device.CreateDepthStencilState(true);
             depthStencilNoZWrite = engine.Device.CreateDepthStencilState(false);
+
+            renderTexture = engine.Device.CreateRenderTexture((int)engine.WindowHost.WindowWidth, (int)engine.WindowHost.WindowHeight);
+
+            outlineTexture = engine.Device.CreateRenderTexture((int)engine.WindowHost.WindowWidth, (int)engine.WindowHost.WindowHeight);
+
+            planeMesh = engine.MeshManager.CreateMesh(new ScreenPlane());
+
+            blitShader = engine.ShaderManager.LoadShader("../internalShaders/blit.shader");
+            blitMaterial = engine.MaterialManager.CreateMaterial(blitShader);
+
+            unlitMaterial = engine.MaterialManager.CreateMaterial(engine.ShaderManager.LoadShader("../internalShaders/unlit.shader"));
         }
+
         private void SetZWrite(bool zwrite)
         {
             if (!currentZwrite.HasValue || currentZwrite.Value != zwrite)
@@ -74,6 +103,9 @@ namespace TheEngine.Managers
 
         public void Dispose()
         {
+            outlineTexture.Dispose();
+            renderTexture.Dispose();
+
             depthStencilZWrite.Dispose();
             depthStencilNoZWrite.Dispose();
             defaultSampler.Dispose();
@@ -85,10 +117,12 @@ namespace TheEngine.Managers
         
         internal void Render()
         {
-            Mesh currentMesh = null;
             UpdateSceneBuffer();
 
-            engine.Device.RenerClearBuffer();
+            engine.Device.RenderClearBuffer();
+
+            engine.Device.SetRenderTexture(renderTexture);
+            renderTexture.Clear(1, 1, 1, 1);
 
             sceneBuffer.UpdateBuffer(ref sceneData);
             sceneBuffer.Activate(Constants.SCENE_BUFFER_INDEX);
@@ -100,9 +134,43 @@ namespace TheEngine.Managers
 
             defaultSampler.Activate(Constants.DEFAULT_SAMPLER);
 
+            RenderAll(null);
+
+            engine.Device.RenderClearBuffer();
+            engine.Device.SetRenderTexture(outlineTexture);
+            outlineTexture.Clear(0, 0, 0, 0);
+
+            RenderAll(unlitMaterial);
+
+            engine.Device.SetRenderTexture(null);
+
+            blitMaterial.Shader.Activate();
+            SetZWrite(false);
+            renderTexture.Activate(0);
+            outlineTexture.Activate(1);
+            engine.meshManager.GetMeshByHandle(planeMesh.Handle).IndicesBuffer.Activate(0);
+            engine.meshManager.GetMeshByHandle(planeMesh.Handle).VerticesBuffer.Activate(0);
+            engine.Device.DrawIndexed(engine.meshManager.GetMeshByHandle(planeMesh.Handle).IndexCount, 0, 0);
+
+
+            engine.Device.RenderBlitBuffer();
+        }
+
+        private void RenderAll(Material overrideMaterial)
+        {
+            currentMesh = null;
+            currentShader = null;
+
             foreach (var shaderPair in renderers)
             {
-                shaderPair.Key.Activate();
+                if (!engine.shaderManager.GetShaderByHandle(shaderPair.Key).WriteMask && overrideMaterial != null)
+                    continue;
+
+                if (overrideMaterial != null)
+                    currentShader = engine.shaderManager.GetShaderByHandle(overrideMaterial.ShaderHandle);
+                else
+                    currentShader = engine.shaderManager.GetShaderByHandle(shaderPair.Key);
+                currentShader.Activate();
 
                 foreach (var materialPair in shaderPair.Value)
                 {
@@ -111,14 +179,17 @@ namespace TheEngine.Managers
                     foreach (var texturePair in materialPair.Key.textures)
                         texturePair.Value.Activate(texturePair.Key);
 
-                    foreach (var bufferKeyPair in materialPair.Key.structuredBuffers)
-                        bufferKeyPair.Value.Activate(bufferKeyPair.Key);
+                    if (overrideMaterial == null)
+                    {
+                        foreach (var bufferKeyPair in materialPair.Key.structuredBuffers)
+                            bufferKeyPair.Value.Activate(bufferKeyPair.Key);
 
-                    foreach (var bufferKeyPair in materialPair.Key.structuredPixelsBuffers)
-                        bufferKeyPair.Value.Activate(bufferKeyPair.Key);
+                        foreach (var bufferKeyPair in materialPair.Key.structuredPixelsBuffers)
+                            bufferKeyPair.Value.Activate(bufferKeyPair.Key);
 
-                    foreach (var bufferKeyPair in materialPair.Key.structuredVertexBuffers)
-                        bufferKeyPair.Value.Activate(bufferKeyPair.Key);
+                        foreach (var bufferKeyPair in materialPair.Key.structuredVertexBuffers)
+                            bufferKeyPair.Value.Activate(bufferKeyPair.Key);
+                    }
 
                     foreach (var meshPair in materialPair.Value)
                     {
@@ -129,9 +200,9 @@ namespace TheEngine.Managers
                             currentMesh = meshPair.Key;
                         }
 
-                        if (shaderPair.Key.Instancing)
+                        if (currentShader.Instancing)
                         {
-                            if (instancesArray.Length != meshPair.Value.Count)
+                            if (instancesArray.Length < meshPair.Value.Count)
                                 instancesArray = new Matrix[meshPair.Value.Count];
 
                             for (int i = 0; i < meshPair.Value.Count; ++i)
@@ -155,7 +226,6 @@ namespace TheEngine.Managers
                     }
                 }
             }
-            engine.Device.RenderBlitBuffer();
         }
 
         private void UpdateSceneBuffer()
@@ -166,17 +236,22 @@ namespace TheEngine.Managers
 
             sceneData.ViewMatrix = vm;
             sceneData.ProjectionMatrix = proj;
+            sceneData.LightPosition = engine.lightManager.MainLight.LightPosition;
+            sceneData.CameraPosition = new Vector4(engine.CameraManager.MainCamera.Transform.Position, 1);
             sceneData.Time = (float)engine.TotalTime;
 
             scenePixelData.LightDirection = new Vector4(engine.lightManager.MainLight.LightDirection, 0);
             scenePixelData.LightColor = engine.lightManager.MainLight.LightColor;
+            scenePixelData.LightPosition = engine.lightManager.MainLight.LightPosition;
             scenePixelData.Time = (float)engine.TotalTime;
+            scenePixelData.ScreenWidth = engine.WindowHost.WindowWidth;
+            scenePixelData.ScreenHeight = engine.WindowHost.WindowHeight;
         }
 
         public RenderHandle RegisterRenderer(MeshHandle meshHandle, Material material, Transform transform)
         {
             var mesh = engine.meshManager.GetMeshByHandle(meshHandle);
-            var shader = material.Shader;
+            var shader = material.ShaderHandle;
 
             if (!renderers.ContainsKey(shader))
                 renderers[shader] = new Dictionary<Material, Dictionary<Mesh, List<Transform>>>();

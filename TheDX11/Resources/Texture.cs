@@ -13,11 +13,11 @@ namespace TheDX11.Resources
 
         internal ShaderResourceView TextureResource { get; }
 
+        internal Texture2D DxTexture { get; }
+
         public int Width { get; }
 
         public int Height { get; }
-
-        private Texture2D texture { get; }
 
         internal Texture(Device device, int[][] pixels, int width, int height)
         {
@@ -28,6 +28,10 @@ namespace TheDX11.Resources
             int stride = Width * 4;
 
             List<SharpDX.DataRectangle> rectangles = new List<SharpDX.DataRectangle>();
+            if (pixels == null)
+            {
+                pixels = new int[][] { new int[width * height] };
+            }
             unsafe
             {
                 foreach (int[] mip in pixels)
@@ -41,7 +45,7 @@ namespace TheDX11.Resources
                 }
             }
             
-            texture = new Texture2D(device, new Texture2DDescription()
+            DxTexture = new Texture2D(device, new Texture2DDescription()
             {
                 Width = Width,
                 Height = Height,
@@ -57,13 +61,13 @@ namespace TheDX11.Resources
 
             ShaderResourceViewDescription srvDesc = new ShaderResourceViewDescription()
             {
-                Format = texture.Description.Format,
+                Format = DxTexture.Description.Format,
                 Dimension = SharpDX.Direct3D.ShaderResourceViewDimension.Texture2D,
             };
             srvDesc.Texture2D.MostDetailedMip = 0;
             srvDesc.Texture2D.MipLevels = -1;
 
-            TextureResource = new ShaderResourceView(device, texture, srvDesc);
+            TextureResource = new ShaderResourceView(device, DxTexture, srvDesc);
         }
 
         // Call from render thread only
@@ -75,7 +79,7 @@ namespace TheDX11.Resources
         public void Dispose()
         {
             TextureResource.Dispose();
-            texture.Dispose();
+            DxTexture.Dispose();
         }
     }
 }

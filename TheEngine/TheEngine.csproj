@@ -85,8 +85,8 @@
     <Compile Include="Managers\RenderManager.cs" />
     <Compile Include="Managers\ShaderManager.cs" />
     <Compile Include="Managers\TextureManager.cs" />
+    <Compile Include="Primitives\ScreenPlane.cs" />
     <Compile Include="Primitives\SkyboxMesh.cs" />
-    <Compile Include="Primitives\SphereFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Structures\SceneBuffer.cs" />
     <Compile Include="Structures\UniversalVertex.cs" />
@@ -103,7 +103,25 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="internalShaders\blit.ps">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="internalShaders\blit.shader">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="internalShaders\blit.vs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="internalShaders\theengine.cginc">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="internalShaders\unlit.ps">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="internalShaders\unlit.shader">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="internalShaders\unlit.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

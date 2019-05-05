@@ -13,6 +13,9 @@ namespace TheEngine.Structures
     {
         public Matrix ViewMatrix;
         public Matrix ProjectionMatrix;
+        public Vector4 CameraPosition;
+        public Vector3 LightPosition;
+        public float Align0;
         public float Time;
 
         public float Align1;
@@ -25,10 +28,12 @@ namespace TheEngine.Structures
     {
         public Vector4 LightDirection;
         public Vector4 LightColor;
+        public Vector3 LightPosition;
+        public float Align0;
         public float Time;
 
-        public float Align1;
-        public float Align2;
+        public float ScreenWidth;
+        public float ScreenHeight;
         public float Align3;
     }
 

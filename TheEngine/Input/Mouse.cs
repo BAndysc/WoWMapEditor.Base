@@ -56,7 +56,7 @@ namespace TheEngine.Input
 
         public bool IsMouseDown(MouseButton button)
         {
-            if (button.HasFlag(MouseButton.Left))
+            if (((int)button & (int)MouseButton.Left) > 0)
                 return leftDown;
 
             return rightDown;

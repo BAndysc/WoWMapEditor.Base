@@ -17,6 +17,8 @@ namespace TheEngine.Entities
         
         internal Shader Shader => shader;
 
+        public ShaderHandle ShaderHandle => shaderHandle;
+
         internal Dictionary<int, ITexture> textures { get; }
         internal Dictionary<int, INativeBuffer> structuredBuffers { get; }
         internal Dictionary<int, INativeBuffer> structuredVertexBuffers { get; }

@@ -97,6 +97,7 @@ namespace TheEngine
             while (!isDisposing)
             {
                 TotalTime = sw.Elapsed.TotalMilliseconds;
+                shaderManager.Update();
                 renderManager.Render();
                 double sinceLast = sw.Elapsed.TotalMilliseconds - lastMs;
                 lastMs = sw.Elapsed.TotalMilliseconds;

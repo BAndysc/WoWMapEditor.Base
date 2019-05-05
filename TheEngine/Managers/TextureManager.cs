@@ -47,17 +47,22 @@ namespace TheEngine.Managers
                     data[y * bitmap.Width + x] = (pixel.R) | (pixel.G << 8) | (pixel.B << 16);
                 }
             }
-            
-            var texture = engine.Device.CreateTexture(bitmap.Width, bitmap.Height, new int[][] { data });
-            var textureHandle = new TextureHandle(allTextures.Count);
-            bitmap.Dispose();
 
+            var textureHandle = CreateTexture(new int[][]{ data }, bitmap.Width, bitmap.Height);
+            bitmap.Dispose();
             texturesByPath.Add(path, textureHandle);
+            return textureHandle;
+        }
+
+        public TextureHandle CreateTexture(int[][] pixels, int width, int height)
+        {
+            var texture = engine.Device.CreateTexture(width, height, pixels);
+            var textureHandle = new TextureHandle(allTextures.Count);
+
             allTextures.Add(texture);
 
             return textureHandle;
         }
-
         public TextureHandle CreateTextureArray(int[][][] textures, int width, int height)
         {
             var texture = engine.Device.CreateTextureArray(width, height, textures);

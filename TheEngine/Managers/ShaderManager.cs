@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,11 +18,45 @@ namespace TheEngine.Managers
 
         private readonly Engine engine;
 
+        private readonly FileSystemWatcher watcher;
+
+        private volatile bool reloadAllShaders = false;
+
         internal ShaderManager(Engine engine)
         {
             shaderHandles = new Dictionary<string, ShaderHandle>();
             byHandleShaders = new List<Shader>();
             this.engine = engine;
+
+            watcher = new FileSystemWatcher();
+            watcher.Path = engine.Configuration.ShaderDirectory;
+
+            watcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName;
+            
+            watcher.Changed += Watcher_Changed;
+            watcher.EnableRaisingEvents = true;
+        }
+        private void Watcher_Changed(object sender, FileSystemEventArgs e)
+        {
+            reloadAllShaders = true;
+        }
+
+        internal void Update()
+        {
+            if (reloadAllShaders)
+            {
+                foreach (var usedShader in shaderHandles.Keys)
+                {
+                    var handle = shaderHandles[usedShader];
+
+                    var recompiled = engine.Device.CreateShader(usedShader, new string[] { Constants.SHADER_INCLUDE_DIR, RemoveFileName(usedShader) });
+
+                    byHandleShaders[handle.Handle].Dispose();
+
+                    byHandleShaders[handle.Handle] = recompiled;
+                }
+                reloadAllShaders = false;
+            }
         }
 
         private string RemoveFileName(string path)
@@ -60,6 +95,8 @@ namespace TheEngine.Managers
 
             byHandleShaders.Clear();
             shaderHandles.Clear();
+
+            watcher.Dispose();
         }
 
         internal Shader GetShaderByHandle(ShaderHandle materialHandle)

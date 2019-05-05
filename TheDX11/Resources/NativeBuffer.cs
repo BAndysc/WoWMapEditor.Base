@@ -111,7 +111,7 @@ namespace TheDX11.Resources
         // this method can be called only from render thread
         public void UpdateBuffer(T[] newData)
         {
-            if (Length != newData.Length)
+            if (Length < newData.Length)
             {
                 Dispose();
                 Length = newData.Length;
@@ -123,7 +123,7 @@ namespace TheDX11.Resources
         // this method can be called only from render thread
         public void UpdateBuffer(ref T newData)
         {
-            if (Length != 1)
+            if (Length < 1)
             {
                 Dispose();
                 Length = 1;

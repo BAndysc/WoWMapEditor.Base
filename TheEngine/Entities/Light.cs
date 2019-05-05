@@ -11,5 +11,7 @@ namespace TheEngine.Entities
     {
         public Vector4 LightColor { get; set; }
         public Vector3 LightDirection { get; set; }
+
+        public Vector3 LightPosition { get; set; }
     }
 }

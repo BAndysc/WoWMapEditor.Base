@@ -20,6 +20,7 @@ namespace TheEngine.Managers
             MainLight = new DirectionalLight();
             MainLight.LightDirection = new TheMaths.Vector3(-1, 0, 0);
             MainLight.LightColor = new TheMaths.Vector4(1, 1, 1, 1);
+            MainLight.LightPosition = TheMaths.Vector3.Zero;
         }
 
         public void Dispose()

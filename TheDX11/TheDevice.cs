@@ -105,7 +105,7 @@ namespace TheDX11
             rasterizerState = new RasterizerState(device, rasterDesc);
 
             device.ImmediateContext.Rasterizer.SetViewport(0, 0, size.Width, size.Height);
-            device.ImmediateContext.OutputMerger.SetTargets(depthStencilView, renderTargetView);
+            SetRenderTexture(null);
             device.ImmediateContext.Rasterizer.State = rasterizerState;
         }
 
@@ -145,6 +145,12 @@ namespace TheDX11
         }
 
         // Safe multithread call
+        public RenderTexture CreateRenderTexture(int width, int height)
+        {
+            return new RenderTexture(device, width, height);
+        }
+
+        // Safe multithread call
         public NativeBuffer<T> CreateBuffer<T>(BufferTypeEnum bufferType, int size) where T : struct
         {
             return new NativeBuffer<T>(device, bufferType, size);
@@ -159,11 +165,13 @@ namespace TheDX11
             return new DepthStencil(device, zWrite);
         }
 
+        private Color4 gray = new Color4(0.4f, 0.4f, 0.4f, 1);
+
         // call only form render thread
-        public void RenerClearBuffer()
+        public void RenderClearBuffer()
         {
             device.ImmediateContext.ClearDepthStencilView(depthStencilView, DepthStencilClearFlags.Depth, 1, 0);
-            device.ImmediateContext.ClearRenderTargetView(renderTargetView, new Color4(0.4f, 0.4f, 0.4f, 1));
+            device.ImmediateContext.ClearRenderTargetView(renderTargetView, gray);
         }
 
         // call only form render thread
@@ -176,6 +184,18 @@ namespace TheDX11
         public void DrawIndexedInstanced(int indexCountPerInstance, int instanceCount, int startIndexLocation, int baseVertexLocation, int startInstanceLocation)
         {
             device.ImmediateContext.DrawIndexedInstanced(indexCountPerInstance, instanceCount, startIndexLocation, baseVertexLocation, startInstanceLocation);
+        }
+
+        /// <summary>
+        /// Sets current render texture.
+        /// call only from render thread
+        /// </summary>
+        /// <param name="renderTexture">render texture or null, then it resets to back buffer</param>
+        public void SetRenderTexture(RenderTexture renderTexture)
+        {
+            RenderTargetView view = renderTexture == null ? renderTargetView : renderTexture.TargetView;
+
+            device.ImmediateContext.OutputMerger.SetTargets(depthStencilView, view);
         }
 
 

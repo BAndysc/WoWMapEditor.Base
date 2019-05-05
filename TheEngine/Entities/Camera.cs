@@ -25,7 +25,7 @@ namespace TheEngine.Entities
         public Camera()
         {
             Transform = new Transform();
-            FOV = 65;
+            FOV = 40;
             NearClip = 1f;
             FarClip = 36600f;
         }

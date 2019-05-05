@@ -24,6 +24,8 @@ namespace TheDX11.Resources
 
         public bool ZWrite { get; }
 
+        public bool WriteMask { get; }
+
         public class ShaderInclude : Include
         {
             private readonly string[] incPaths;
@@ -69,6 +71,7 @@ namespace TheDX11.Resources
             var pixelMacros = new List<ShaderMacro> { new ShaderMacro("PIXEL_SHADER", 1) };
 
             ZWrite = shaderData.ZWrite;
+            WriteMask = shaderData.WriteMask;
             Instancing = shaderData.Instancing;
             if (Instancing)
             {
@@ -207,5 +210,7 @@ namespace TheDX11.Resources
         public bool Instancing { get; set; }
 
         public bool ZWrite { get; set; }
+
+        public bool WriteMask { get; set; }
     }
 }
